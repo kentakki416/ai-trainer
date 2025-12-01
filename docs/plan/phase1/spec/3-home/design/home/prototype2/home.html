@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-Trainer - ホーム</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f7f7f7;
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+      justify-content: center;
+      gap: 40px;
+      padding: 0 20px;
+    }
+
+    /* Left Sidebar */
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(180deg, #4A90E2 0%, #357ABD 100%);
+      color: white;
+      padding: 20px 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: white;
+      padding: 0 20px 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      margin-bottom: 20px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 20px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-weight: 500;
+      font-size: 15px;
+      color: white;
+    }
+
+    .nav-item:hover {
+      background-color: rgba(255,255,255,0.1);
+    }
+
+    .nav-item.active {
+      background-color: rgba(255,255,255,0.2);
+      border-left: 4px solid white;
+    }
+
+    .nav-item .icon {
+      width: 32px;
+      height: 32px;
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: 250px;
+      margin-right: 350px;
+      padding: 40px 60px;
+      max-width: 800px;
+    }
+
+    /* Header Card */
+    .lesson-header {
+      background: linear-gradient(135deg, #FF9A56 0%, #FF6B35 100%);
+      color: white;
+      padding: 32px;
+      border-radius: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      box-shadow:
+        0 10px 30px rgba(255, 107, 53, 0.4),
+        0 4px 12px rgba(255, 107, 53, 0.3),
+        inset 0 2px 6px rgba(255,255,255,0.3),
+        inset 0 -2px 6px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .lesson-header:hover {
+      box-shadow:
+        0 14px 40px rgba(255, 107, 53, 0.5),
+        0 6px 16px rgba(255, 107, 53, 0.4),
+        inset 0 2px 6px rgba(255,255,255,0.4),
+        inset 0 -2px 6px rgba(0,0,0,0.1);
+      transform: translateY(-4px);
+    }
+
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 60%);
+      animation: shine 8s ease-in-out infinite;
+    }
+
+    .lesson-header::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%);
+      border-radius: 24px 24px 0 0;
+      pointer-events: none;
+    }
+
+    @keyframes shine {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-20%, -20%); }
+    }
+
+    .lesson-header > div {
+      position: relative;
+      z-index: 1;
+    }
+
+    .lesson-header h2 {
+      font-size: 26px;
+      font-weight: bold;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .lesson-header .subtitle {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .guidebook-btn {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.25) 50%, rgba(255, 255, 255, 0.2) 100%);
+      border: 3px solid rgba(255, 255, 255, 0.6);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.2),
+        inset 0 1px 2px rgba(255, 255, 255, 0.4),
+        inset 0 -1px 3px rgba(0, 0, 0, 0.15);
+      position: relative;
+      z-index: 1;
+    }
+
+    .guidebook-btn:hover {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.3) 100%);
+      transform: scale(1.05);
+    }
+
+    .guidebook-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Lesson Path */
+    .lesson-path {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      padding: 20px 0;
+      width: 100%;
+    }
+
+    .path-line {
+      display: none;
+    }
+
+    .lesson-node {
+      position: relative;
+      z-index: 1;
+      margin: 12px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: all 0.3s;
+    }
+
+    .lesson-node:nth-child(2) {
+      transform: translateX(-20px);
+    }
+
+    .lesson-node:nth-child(3) {
+      transform: translateX(18px);
+    }
+
+    .lesson-node:nth-child(4) {
+      transform: translateX(-22px);
+    }
+
+    .lesson-node:nth-child(5) {
+      transform: translateX(20px);
+    }
+
+    .lesson-node:nth-child(6) {
+      transform: translateX(-18px);
+    }
+
+    .lesson-node:nth-child(7) {
+      transform: translateX(15px);
+    }
+
+    .node-button {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      transition: all 0.2s;
+      position: relative;
+      background: linear-gradient(180deg, #e8e8e8 0%, #d0d0d0 100%);
+      box-shadow:
+        0 6px 12px rgba(0,0,0,0.15),
+        inset 0 -4px 8px rgba(0,0,0,0.1),
+        inset 0 2px 4px rgba(255,255,255,0.8);
+    }
+
+    .node-button::before {
+      content: '';
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #f0f0f0 0%, #e0e0e0 100%);
+      box-shadow:
+        0 -2px 6px rgba(255,255,255,0.8) inset,
+        0 4px 8px rgba(0,0,0,0.15) inset;
+      z-index: 0;
+    }
+
+    .node-button::after {
+      content: '⭐';
+      position: absolute;
+      font-size: 36px;
+      z-index: 1;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+
+    .node-button:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        0 8px 16px rgba(0,0,0,0.2),
+        inset 0 -4px 8px rgba(0,0,0,0.1),
+        inset 0 2px 4px rgba(255,255,255,0.8);
+    }
+
+    .node-button:active {
+      transform: translateY(2px);
+      box-shadow:
+        0 3px 6px rgba(0,0,0,0.15),
+        inset 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .node-button.active {
+      background: linear-gradient(180deg, #58cc02 0%, #4caf50 100%);
+      box-shadow:
+        0 6px 12px rgba(88,204,2,0.4),
+        inset 0 -4px 8px rgba(0,0,0,0.15),
+        inset 0 2px 4px rgba(255,255,255,0.5);
+    }
+
+    .node-button.active::before {
+      background: linear-gradient(180deg, #6cd917 0%, #58cc02 100%);
+      box-shadow:
+        0 -2px 6px rgba(255,255,255,0.6) inset,
+        0 4px 8px rgba(0,0,0,0.2) inset;
+    }
+
+    .node-button.active::after {
+      content: '⭐';
+      color: white;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+
+    .node-button.active:hover {
+      box-shadow:
+        0 8px 16px rgba(88,204,2,0.5),
+        inset 0 -4px 8px rgba(0,0,0,0.15),
+        inset 0 2px 4px rgba(255,255,255,0.5);
+    }
+
+    .node-button.active:active {
+      transform: translateY(2px);
+      box-shadow:
+        0 3px 6px rgba(88,204,2,0.3),
+        inset 0 2px 6px rgba(0,0,0,0.25);
+    }
+
+    .node-button.locked {
+      background: linear-gradient(180deg, #e8e8e8 0%, #d0d0d0 100%);
+      cursor: not-allowed;
+    }
+
+    .node-button.locked::before {
+      background: linear-gradient(180deg, #f0f0f0 0%, #e0e0e0 100%);
+    }
+
+    .node-button.locked::after {
+      content: '⭐';
+      color: #b0b0b0;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+    }
+
+    .node-button.locked:hover {
+      transform: none;
+    }
+
+    .node-button.trophy::after {
+      content: '🏆';
+    }
+
+    .start-label {
+      background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 3px solid #e5e5e5;
+      margin-bottom: 12px;
+      font-weight: 600;
+      color: #afafaf;
+      box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.08),
+        0 3px 12px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .character {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(180deg, #6cd917 0%, #58cc02 50%, #4caf50 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      box-shadow:
+        0 2px 8px rgba(88, 204, 2, 0.3),
+        0 4px 16px rgba(88, 204, 2, 0.2),
+        inset 0 -5px 12px rgba(0, 0, 0, 0.2),
+        inset 0 3px 6px rgba(255, 255, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+      border: 5px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .character::after {
+      content: '';
+      position: absolute;
+      top: 10%;
+      left: 25%;
+      right: 25%;
+      height: 35%;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      filter: blur(10px);
+    }
+
+    .character::before {
+      content: '🦉';
+      font-size: 60px;
+      position: absolute;
+      bottom: 10px;
+    }
+
+    .treasure-box {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(180deg, #ffe55c 0%, #ffd700 50%, #ffb700 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      box-shadow:
+        0 2px 8px rgba(255, 183, 0, 0.3),
+        0 4px 16px rgba(255, 183, 0, 0.2),
+        inset 0 -4px 10px rgba(0, 0, 0, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.4);
+      transform: rotate(5deg);
+      border: 4px solid rgba(255, 255, 255, 0.4);
+      position: relative;
+    }
+
+    .treasure-box::before {
+      content: '';
+      position: absolute;
+      top: 10%;
+      left: 20%;
+      right: 20%;
+      height: 30%;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      filter: blur(6px);
+    }
+
+    /* Section Divider */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      margin: 60px 0 40px;
+      color: #afafaf;
+      font-weight: 600;
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background-color: #e5e5e5;
+    }
+
+    .section-divider::before {
+      margin-right: 20px;
+    }
+
+    .section-divider::after {
+      margin-left: 20px;
+    }
+
+    /* Skip Button */
+    .skip-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 40px;
+    }
+
+    .skip-label {
+      color: #ce82ff;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .skip-button {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #e0a0ff 0%, #ce82ff 50%, #b467ff 100%);
+      border: 4px solid rgba(255, 255, 255, 0.4);
+      color: white;
+      font-size: 32px;
+      cursor: pointer;
+      box-shadow:
+        0 2px 8px rgba(206, 130, 255, 0.3),
+        0 4px 16px rgba(206, 130, 255, 0.2),
+        inset 0 -3px 8px rgba(0, 0, 0, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .skip-button::before {
+      content: '';
+      position: absolute;
+      top: 8%;
+      left: 20%;
+      right: 20%;
+      height: 30%;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      filter: blur(8px);
+    }
+
+    .skip-button:hover {
+      transform: scale(1.05);
+    }
+
+    .skip-button:active {
+      transform: scale(0.98);
+    }
+
+    /* Right Sidebar */
+    .right-sidebar {
+      width: 350px;
+      position: fixed;
+      right: 0;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 20px;
+      background-color: #f7f7f7;
+    }
+
+    /* Top Header Stats */
+    .header-stats {
+      display: flex;
+      gap: 16px;
+      justify-content: flex-end;
+      margin-bottom: 24px;
+      padding: 16px 0;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8f8f8 100%);
+      border-radius: 12px;
+      border: 3px solid #e5e5e5;
+      font-weight: 600;
+      box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.08),
+        0 3px 12px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .stat-icon {
+      font-size: 20px;
+    }
+
+    /* Card Styles */
+    .card {
+      background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 3px solid #e5e5e5;
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08),
+        0 4px 16px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .ranking-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ranking-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(180deg, #eef2f6 0%, #dfe4ea 50%, #c5cdd6 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.1),
+        0 3px 12px rgba(0, 0, 0, 0.05),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.1),
+        inset 0 1px 2px rgba(255, 255, 255, 0.6);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .ranking-text {
+      color: #777;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Quest Card */
+    .quest-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .view-all {
+      color: #1cb0f6;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .quest-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .quest-icon {
+      font-size: 32px;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    .quest-reward {
+      font-size: 24px;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    .quest-info {
+      flex: 1;
+    }
+
+    .quest-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: linear-gradient(180deg, #d5d5d5 0%, #e5e5e5 100%);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ffc800 0%, #ffaa00 100%);
+      width: 0%;
+      box-shadow: 0 2px 4px rgba(255, 170, 0, 0.3);
+    }
+
+    .progress-text {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 11px;
+      font-weight: 600;
+      color: #777;
+    }
+
+    /* Auth Card */
+    .auth-message {
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: #4b4b4b;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .btn:hover {
+      transform: scale(1.02);
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #6cd917 0%, #58cc02 50%, #4caf50 100%);
+      color: white;
+      box-shadow:
+        0 2px 8px rgba(88, 204, 2, 0.3),
+        0 4px 16px rgba(88, 204, 2, 0.2),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(180deg, #42c5ff 0%, #1cb0f6 50%, #1899d6 100%);
+      color: white;
+      box-shadow:
+        0 2px 8px rgba(28, 176, 246, 0.3),
+        0 4px 16px rgba(28, 176, 246, 0.2),
+        inset 0 -2px 6px rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 2px solid #e5e5e5;
+    }
+
+    .footer-links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 12px;
+      color: #afafaf;
+    }
+
+    .footer-link {
+      cursor: pointer;
+    }
+
+    .footer-link:hover {
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">AI-Trainer</div>
+      <nav>
+        <div class="nav-item active">
+          <span class="icon">🏠</span>
+          <span>レッスン</span>
+        </div>
+        <div class="nav-item">
+          <span class="icon">あ</span>
+          <span>文字</span>
+        </div>
+        <div class="nav-item">
+          <span class="icon">🛡️</span>
+          <span>ランキング</span>
+        </div>
+        <div class="nav-item">
+          <span class="icon">🎯</span>
+          <span>クエスト</span>
+        </div>
+        <div class="nav-item">
+          <span class="icon">🏪</span>
+          <span>ショップ</span>
+        </div>
+        <div class="nav-item">
+          <span class="icon">👤</span>
+          <span>プロフィール</span>
+        </div>
+        <div class="nav-item">
+          <span class="icon">⋯</span>
+          <span>もっと見る</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Lesson Header -->
+      <div class="lesson-header">
+        <div>
+          <div class="subtitle">
+            <span style="font-size: 28px;">🎯</span>
+            <span>現在の目標</span>
+          </div>
+          <h2>基礎スキルを習得する</h2>
+        </div>
+        <button class="guidebook-btn">
+          📖 ガイド
+        </button>
+      </div>
+
+      <!-- Lesson Path -->
+      <div class="lesson-path">
+        <div class="path-line"></div>
+
+        <div class="lesson-node">
+          <div class="start-label">スタート</div>
+          <button class="node-button active"></button>
+        </div>
+
+        <div class="lesson-node">
+          <button class="node-button locked"></button>
+        </div>
+
+        <div class="lesson-node">
+          <div class="treasure-box">🎁</div>
+        </div>
+
+        <div class="lesson-node">
+          <div class="character"></div>
+        </div>
+
+        <div class="lesson-node">
+          <button class="node-button locked"></button>
+        </div>
+
+        <div class="lesson-node">
+          <button class="node-button locked trophy"></button>
+        </div>
+      </div>
+
+      <!-- Section Divider -->
+      <div class="section-divider">自己紹介をする</div>
+
+      <!-- Skip Section -->
+      <div class="skip-section">
+        <div class="skip-label">ここに飛び級する？</div>
+        <button class="skip-button">▶️</button>
+      </div>
+
+      <div class="lesson-node" style="margin-top: 40px;">
+        <button class="node-button locked"></button>
+      </div>
+    </main>
+
+    <!-- Right Sidebar -->
+    <aside class="right-sidebar">
+      <!-- Header Stats -->
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-icon">🇺🇸</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">🔥</span>
+          <span>0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">💎</span>
+          <span>500</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">❤️</span>
+          <span>5</span>
+        </div>
+      </div>
+
+      <!-- Ranking Card -->
+      <div class="card">
+        <h3 class="card-title">ランキングに参加しよう！</h3>
+        <div class="ranking-card">
+          <div class="ranking-icon">🔒</div>
+          <div class="ranking-text">
+            レッスンをあと10回コンプリートするとランキングに参加できるよ。
+          </div>
+        </div>
+      </div>
+
+      <!-- Quest Card -->
+      <div class="card">
+        <div class="quest-header">
+          <h3 class="card-title">デイリークエスト</h3>
+          <span class="view-all">すべて表示</span>
+        </div>
+        <div class="quest-item">
+          <span class="quest-icon">⚡</span>
+          <div class="quest-info">
+            <div class="quest-title">10XPをゲットする</div>
+            <div class="progress-bar">
+              <div class="progress-fill"></div>
+              <span class="progress-text">0 / 10</span>
+            </div>
+          </div>
+          <span class="quest-reward">🎁</span>
+        </div>
+      </div>
+
+      <!-- Auth Card -->
+      <div class="card">
+        <div class="auth-message">
+          アカウントを作って学習の成果を保存しよう！
+        </div>
+        <button class="btn btn-primary">アカウントを作る（無料）</button>
+        <button class="btn btn-secondary">ログイン</button>
+
+        <!-- Footer -->
+        <div class="footer">
+          <div class="footer-links">
+            <div class="footer-link">企業情報</div>
+            <div class="footer-link">ストア</div>
+            <div class="footer-link">学習効果</div>
+            <div class="footer-link">採用情報</div>
+            <div class="footer-link">株主・投資家情報</div>
+            <div class="footer-link">利用規約</div>
+            <div class="footer-link">プライバシー</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>
