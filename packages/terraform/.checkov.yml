@@ -1,0 +1,25 @@
+# Checkov Configuration
+
+# フレームワーク設定
+framework:
+  - terraform
+  - terraform_plan
+
+# 除外するチェック
+skip-check:
+  # 開発環境では一部の厳格なルールを除外
+  # - CKV_AWS_18  # セキュリティグループの説明が必須
+  # - CKV_AWS_19  # セキュリティグループの名前が必須
+  # - CKV_AWS_20  # セキュリティグループのルールに説明が必須
+
+# 除外するディレクトリ
+skip-path:
+  - "**/.terraform/**"
+  - "**/node_modules/**"
+  - "**/test/**"
+  - "**/examples/**"
+
+# 外部チェックの設定
+external-checks-dir:
+  - "aws/test/checkov"
+
