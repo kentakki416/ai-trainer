@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Trainer - ホーム画面プロトタイプ（縦一列）</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #F7F9FC;
+      color: #333;
+      line-height: 1.6;
+      display: flex;
+    }
+
+    /* サイドバーメニュー */
+    .sidebar {
+      width: 240px;
+      background: linear-gradient(180deg, #4A90E2 0%, #357ABD 100%);
+      color: white;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      padding: 20px 0;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 0 20px 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      margin-bottom: 20px;
+    }
+
+    .sidebar-logo h1 {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+    }
+
+    .sidebar-menu-item {
+      padding: 14px 20px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-menu-item:hover {
+      background-color: rgba(255,255,255,0.1);
+    }
+
+    .sidebar-menu-item.active {
+      background-color: rgba(255,255,255,0.2);
+      border-left: 4px solid white;
+    }
+
+    .sidebar-menu-icon {
+      font-size: 20px;
+    }
+
+    .main-wrapper {
+      margin-left: 240px;
+      flex: 1;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0;
+    }
+
+
+    /* メインコンテンツ */
+    .main-content {
+      padding: 40px 20px 100px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .content-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* カード共通スタイル */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow:
+        0 4px 6px rgba(0,0,0,0.07),
+        0 10px 20px rgba(0,0,0,0.06),
+        inset 0 -2px 6px rgba(0,0,0,0.03);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, transparent 100%);
+      border-radius: 16px 16px 0 0;
+      pointer-events: none;
+    }
+
+    .card:hover {
+      box-shadow:
+        0 8px 12px rgba(0,0,0,0.1),
+        0 16px 32px rgba(0,0,0,0.08),
+        inset 0 -2px 6px rgba(0,0,0,0.03);
+      transform: translateY(-2px);
+    }
+
+    /* キャラクターエリア */
+    .character-area {
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .character-area::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+
+    .character-area::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+      border-radius: 16px 16px 0 0;
+      pointer-events: none;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .character-container {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+    }
+
+    .character-image {
+      width: 180px;
+      height: 180px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 90px;
+      animation: float 3s ease-in-out infinite;
+      box-shadow:
+        0 8px 32px rgba(0,0,0,0.15),
+        inset 0 2px 8px rgba(255,255,255,0.3),
+        inset 0 -2px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .character-image:hover {
+      transform: scale(1.1) translateY(-5px);
+      box-shadow:
+        0 12px 40px rgba(0,0,0,0.2),
+        inset 0 2px 8px rgba(255,255,255,0.4),
+        inset 0 -2px 8px rgba(0,0,0,0.1);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* 吹き出し */
+    .character-speech {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      background: white;
+      color: #667eea;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: bold;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      margin-bottom: 8px;
+    }
+
+    .character-speech::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid white;
+    }
+
+    .character-image:hover .character-speech {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .character-stats {
+      opacity: 1;
+      transform: translateY(0);
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow:
+        0 4px 16px rgba(0,0,0,0.1),
+        inset 0 1px 3px rgba(255,255,255,0.5);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .character-area:hover .character-stats {
+      box-shadow:
+        0 6px 20px rgba(0,0,0,0.12),
+        inset 0 1px 3px rgba(255,255,255,0.5);
+    }
+
+    .character-name {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #667eea;
+    }
+
+    .level-info {
+      font-size: 15px;
+      color: #666;
+      margin-bottom: 14px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 28px;
+      background-color: #E8EEF5;
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4A90E2 0%, #357ABD 100%);
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .next-level {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    /* 目標カード - 特別デザイン */
+    .goal-card {
+      background: linear-gradient(135deg, #FF9A56 0%, #FF6B35 100%);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow:
+        0 10px 30px rgba(255, 107, 53, 0.4),
+        0 4px 12px rgba(255, 107, 53, 0.3),
+        inset 0 2px 6px rgba(255,255,255,0.3),
+        inset 0 -2px 6px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .goal-card:hover {
+      box-shadow:
+        0 14px 40px rgba(255, 107, 53, 0.5),
+        0 6px 16px rgba(255, 107, 53, 0.4),
+        inset 0 2px 6px rgba(255,255,255,0.4),
+        inset 0 -2px 6px rgba(0,0,0,0.1);
+      transform: translateY(-4px);
+    }
+
+    .goal-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 60%);
+      animation: shine 8s ease-in-out infinite;
+    }
+
+    .goal-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%);
+      border-radius: 24px 24px 0 0;
+      pointer-events: none;
+    }
+
+    @keyframes shine {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-20%, -20%); }
+    }
+
+    .goal-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .goal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .goal-header h2 {
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .goal-title {
+      font-size: 26px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .goal-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 15px;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .goal-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.15);
+      padding: 10px 14px;
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+    }
+
+    .goal-card .progress-bar {
+      background-color: rgba(255,255,255,0.2);
+      height: 32px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .goal-card .progress-fill {
+      background: linear-gradient(90deg, #FFE66D 0%, #FFC93C 100%);
+      color: #333;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(255, 230, 109, 0.4);
+      font-size: 14px;
+    }
+
+    /* 中間ゴールカード - 横スクロール */
+    .milestones-container {
+      margin-top: 12px;
+    }
+
+    .milestones-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 12px 0;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .milestones-scroll::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .milestones-scroll::-webkit-scrollbar-track {
+      background: #E8EEF5;
+      border-radius: 4px;
+    }
+
+    .milestones-scroll::-webkit-scrollbar-thumb {
+      background: #4A90E2;
+      border-radius: 4px;
+    }
+
+    .milestone-item {
+      min-width: 180px;
+      width: 180px;
+      height: 180px;
+      padding: 16px;
+      border-radius: 16px;
+      background: white;
+      border: 2px solid #E8EEF5;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow:
+        0 4px 8px rgba(0,0,0,0.06),
+        0 8px 16px rgba(0,0,0,0.04),
+        inset 0 1px 3px rgba(255,255,255,0.8);
+      position: relative;
+    }
+
+    .milestone-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 100%);
+      border-radius: 20px 20px 0 0;
+      pointer-events: none;
+    }
+
+    .milestone-item:hover {
+      transform: translateY(-6px);
+      box-shadow:
+        0 8px 16px rgba(0,0,0,0.1),
+        0 16px 32px rgba(0,0,0,0.08),
+        inset 0 1px 3px rgba(255,255,255,0.8);
+    }
+
+    .milestone-item.completed {
+      border-color: #7ED321;
+      background: linear-gradient(135deg, #F0FFF0 0%, #E8F5E9 100%);
+      box-shadow:
+        0 4px 8px rgba(126, 211, 33, 0.15),
+        0 8px 16px rgba(126, 211, 33, 0.1),
+        inset 0 1px 3px rgba(255,255,255,0.8);
+    }
+
+    .milestone-item.active {
+      border-color: #4A90E2;
+      background: linear-gradient(135deg, #F0F7FF 0%, #E3F2FD 100%);
+      box-shadow:
+        0 6px 12px rgba(74, 144, 226, 0.2),
+        0 12px 24px rgba(74, 144, 226, 0.15),
+        inset 0 1px 3px rgba(255,255,255,0.8);
+    }
+
+    .milestone-icon {
+      font-size: 36px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .milestone-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 13px;
+      line-height: 1.3;
+      color: #333;
+    }
+
+    .milestone-meta {
+      font-size: 10px;
+      color: #666;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    /* カレンダー */
+    .calendar {
+      margin-top: 12px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .calendar-title {
+      font-weight: bold;
+    }
+
+    .calendar-nav {
+      display: flex;
+      gap: 12px;
+    }
+
+    .calendar-nav button {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: #4A90E2;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .calendar-day-header {
+      text-align: center;
+      font-size: 11px;
+      font-weight: bold;
+      color: #666;
+      padding: 6px 0;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      background-color: #F7F9FC;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      font-size: 13px;
+    }
+
+    .calendar-day:hover {
+      background-color: #E8EEF5;
+    }
+
+    .calendar-day.completed {
+      background-color: #7ED321;
+      color: white;
+      font-weight: bold;
+    }
+
+    .calendar-day.incomplete {
+      background-color: #FFE5E5;
+      color: #D32F2F;
+    }
+
+    .calendar-day.today {
+      border: 2px solid #4A90E2;
+      font-weight: bold;
+    }
+
+    .calendar-day.completed::after {
+      content: '✓';
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      font-size: 10px;
+    }
+
+    /* 進捗入力ボタン */
+    .input-button {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 760px;
+      width: calc(100% - 40px);
+      z-index: 100;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+      color: white;
+      border: none;
+      padding: 16px 24px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow:
+        0 6px 16px rgba(74, 144, 226, 0.4),
+        0 2px 8px rgba(74, 144, 226, 0.3),
+        inset 0 2px 4px rgba(255,255,255,0.3),
+        inset 0 -2px 4px rgba(0,0,0,0.1);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow:
+        0 10px 24px rgba(74, 144, 226, 0.5),
+        0 4px 12px rgba(74, 144, 226, 0.4),
+        inset 0 2px 4px rgba(255,255,255,0.4),
+        inset 0 -2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow:
+        0 4px 12px rgba(74, 144, 226, 0.3),
+        inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* モーダル */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      animation: fadeIn 0.2s;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+
+    .close-btn:hover {
+      background-color: #F7F9FC;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #E8EEF5;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #4A90E2;
+    }
+
+    textarea.form-input {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .time-inputs {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .time-input {
+      flex: 1;
+    }
+
+    .time-input input {
+      width: 100%;
+    }
+
+    .rating-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .rating-btn {
+      background: none;
+      border: 2px solid #E8EEF5;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .rating-btn:hover {
+      border-color: #4A90E2;
+      transform: scale(1.1);
+    }
+
+    .rating-btn.selected {
+      border-color: #4A90E2;
+      background-color: #F0F7FF;
+      transform: scale(1.1);
+    }
+
+    .btn-secondary {
+      width: 100%;
+      background-color: #F7F9FC;
+      color: #4A90E2;
+      border: 2px solid #4A90E2;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 12px;
+    }
+
+    .btn-secondary:hover {
+      background-color: #E8EEF5;
+    }
+
+    .success-message {
+      text-align: center;
+      padding: 16px;
+      background-color: #F0FFF0;
+      border-radius: 8px;
+      margin-top: 16px;
+      color: #7ED321;
+      font-weight: bold;
+    }
+
+    /* レスポンシブ */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 200px;
+      }
+
+      .main-wrapper {
+        margin-left: 200px;
+      }
+
+      .main-content {
+        padding: 24px 16px 80px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      .goal-card {
+        padding: 24px;
+      }
+
+      .character-image {
+        width: 140px;
+        height: 140px;
+        font-size: 70px;
+      }
+
+      .character-stats {
+        max-width: 100%;
+      }
+
+      .calendar-day {
+        font-size: 12px;
+      }
+
+      .milestone-item {
+        min-width: 160px;
+        width: 160px;
+        height: 160px;
+      }
+    }
+
+    .menu-toggle {
+      display: none;
+    }
+
+    @media (max-width: 480px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-wrapper {
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: block;
+        position: fixed;
+        left: 16px;
+        top: 16px;
+        z-index: 101;
+        background: #4A90E2;
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- メニュートグルボタン（モバイル用） -->
+  <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+  <!-- サイドバーメニュー -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <h1>AI Trainer</h1>
+    </div>
+    <ul class="sidebar-menu">
+      <li class="sidebar-menu-item active">
+        <span class="sidebar-menu-icon">🏠</span>
+        <span>ホーム</span>
+      </li>
+      <li class="sidebar-menu-item">
+        <span class="sidebar-menu-icon">📊</span>
+        <span>統計</span>
+      </li>
+      <li class="sidebar-menu-item">
+        <span class="sidebar-menu-icon">🏆</span>
+        <span>実績</span>
+      </li>
+      <li class="sidebar-menu-item">
+        <span class="sidebar-menu-icon">⚙️</span>
+        <span>設定</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- メインコンテンツエリア -->
+  <div class="main-wrapper">
+    <div class="container">
+      <div class="main-content">
+        <div class="content-column">
+          <!-- キャラクターエリア -->
+          <div class="card character-area">
+            <div class="character-container">
+              <div class="character-image">
+                🐣
+                <div class="character-speech">今日も頑張ろう！</div>
+              </div>
+              <div class="character-stats">
+                <div class="character-name">トレちゃん Lv.15</div>
+                <div class="level-info">経験値 150 / 250</div>
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: 60%;">60%</div>
+                </div>
+                <div class="next-level">次のレベルまで 100 exp</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 目標カード -->
+          <div class="goal-card">
+            <div class="goal-content">
+              <div class="goal-header">
+                <span style="font-size: 28px;">🎯</span>
+                <h2>現在の目標</h2>
+              </div>
+              <div class="goal-title">TOEIC 800点取得</div>
+              <div class="goal-meta">
+                <div class="goal-meta-item">
+                  <span>📅</span>
+                  <span>達成希望日: 2025-12-31</span>
+                </div>
+                <div class="goal-meta-item">
+                  <span>⏱️</span>
+                  <span>累計学習: 45時間 / 200時間</span>
+                </div>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 22.5%;">22.5%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- カレンダーカード -->
+          <div class="card">
+            <div class="goal-header">
+              <span style="font-size: 24px;">📅</span>
+              <h2>今月の学習記録</h2>
+            </div>
+
+            <div class="calendar">
+              <div class="calendar-header">
+                <button class="calendar-nav">◀</button>
+                <div class="calendar-title">2025年12月</div>
+                <button class="calendar-nav">▶</button>
+              </div>
+
+              <div class="calendar-grid">
+                <!-- 曜日ヘッダー -->
+                <div class="calendar-day-header">月</div>
+                <div class="calendar-day-header">火</div>
+                <div class="calendar-day-header">水</div>
+                <div class="calendar-day-header">木</div>
+                <div class="calendar-day-header">金</div>
+                <div class="calendar-day-header">土</div>
+                <div class="calendar-day-header">日</div>
+
+                <!-- 日付 -->
+                <div class="calendar-day incomplete">1</div>
+                <div class="calendar-day completed">2</div>
+                <div class="calendar-day completed">3</div>
+                <div class="calendar-day incomplete">4</div>
+                <div class="calendar-day completed">5</div>
+                <div class="calendar-day incomplete">6</div>
+                <div class="calendar-day incomplete">7</div>
+
+                <div class="calendar-day completed">8</div>
+                <div class="calendar-day completed">9</div>
+                <div class="calendar-day today">10</div>
+                <div class="calendar-day">11</div>
+                <div class="calendar-day">12</div>
+                <div class="calendar-day">13</div>
+                <div class="calendar-day">14</div>
+
+                <div class="calendar-day">15</div>
+                <div class="calendar-day">16</div>
+                <div class="calendar-day">17</div>
+                <div class="calendar-day">18</div>
+                <div class="calendar-day">19</div>
+                <div class="calendar-day">20</div>
+                <div class="calendar-day">21</div>
+
+                <div class="calendar-day">22</div>
+                <div class="calendar-day">23</div>
+                <div class="calendar-day">24</div>
+                <div class="calendar-day">25</div>
+                <div class="calendar-day">26</div>
+                <div class="calendar-day">27</div>
+                <div class="calendar-day">28</div>
+
+                <div class="calendar-day">29</div>
+                <div class="calendar-day">30</div>
+                <div class="calendar-day">31</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 中間ゴールカード -->
+          <div class="card">
+            <div class="goal-header">
+              <span style="font-size: 24px;">🏁</span>
+              <h2>中間ゴール</h2>
+            </div>
+
+            <div class="milestones-container">
+              <div class="milestones-scroll">
+                <div class="milestone-item completed">
+                  <div>
+                    <div class="milestone-icon">✅</div>
+                    <div class="milestone-title">英単語1000語マスター</div>
+                    <div class="milestone-meta">達成日: 2025-11-30<br>学習時間: 30時間</div>
+                  </div>
+                  <div class="progress-bar" style="height: 8px;">
+                    <div class="progress-fill" style="width: 100%; font-size: 0;"></div>
+                  </div>
+                </div>
+
+                <div class="milestone-item active">
+                  <div>
+                    <div class="milestone-icon">🎯</div>
+                    <div class="milestone-title">TOEIC 650点達成</div>
+                    <div class="milestone-meta">目標日: 2025-03-31<br>進捗: 30時間 / 80時間</div>
+                  </div>
+                  <div class="progress-bar" style="height: 8px;">
+                    <div class="progress-fill" style="width: 37.5%; font-size: 0;"></div>
+                  </div>
+                </div>
+
+                <div class="milestone-item">
+                  <div>
+                    <div class="milestone-icon">⭕</div>
+                    <div class="milestone-title">TOEIC 750点達成</div>
+                    <div class="milestone-meta">目標日: 2025-06-30<br>推定: 90時間</div>
+                  </div>
+                  <div class="progress-bar" style="height: 8px;">
+                    <div class="progress-fill" style="width: 0%; font-size: 0;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 進捗入力ボタン（固定） -->
+  <div class="input-button">
+    <button class="btn-primary" onclick="openModal()">
+      <span>✏️</span>
+      <span>今日の進捗を記録する</span>
+    </button>
+  </div>
+
+  <!-- 進捗入力モーダル -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">今日の進捗を記録</div>
+        <button class="close-btn" onclick="closeModal()">✕</button>
+      </div>
+
+      <!-- 簡易入力モード -->
+      <div id="quickMode">
+        <div style="text-align: center; margin: 30px 0;">
+          <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
+          <div style="font-size: 18px; margin-bottom: 24px;">今日も頑張りました！</div>
+        </div>
+
+        <button class="btn-primary" onclick="quickSave()">
+          <span>👍</span>
+          <span>今日もやった！(30分)</span>
+        </button>
+
+        <button class="btn-secondary" onclick="showDetailMode()">
+          <span>✏️</span>
+          <span>詳細を入力する</span>
+        </button>
+      </div>
+
+      <!-- 詳細入力モード -->
+      <div id="detailMode" style="display: none;">
+        <div class="form-group">
+          <label class="form-label">📅 日付</label>
+          <input type="date" class="form-input" value="2025-12-10">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">学習内容</label>
+          <textarea class="form-input" placeholder="例: 英単語100個暗記、リスニング練習30分"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">学習時間</label>
+          <div class="time-inputs">
+            <div class="time-input">
+              <input type="number" class="form-input" placeholder="時間" min="0" value="1">
+            </div>
+            <span>時間</span>
+            <div class="time-input">
+              <input type="number" class="form-input" placeholder="分" min="0" max="59" value="30">
+            </div>
+            <span>分</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">達成度</label>
+          <div class="rating-group">
+            <button class="rating-btn" onclick="selectRating(1)">😞</button>
+            <button class="rating-btn" onclick="selectRating(2)">😐</button>
+            <button class="rating-btn" onclick="selectRating(3)">🙂</button>
+            <button class="rating-btn" onclick="selectRating(4)">😊</button>
+            <button class="rating-btn" onclick="selectRating(5)">😄</button>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="detailSave()">
+          <span>💾</span>
+          <span>保存する</span>
+        </button>
+
+        <button class="btn-secondary" onclick="showQuickMode()">
+          ← 簡易入力に戻る
+        </button>
+      </div>
+
+      <!-- 成功メッセージ -->
+      <div id="successMessage" class="success-message" style="display: none;">
+        🎉 キャラクターが成長しました！
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedRating = null;
+
+    function openModal() {
+      document.getElementById('modalOverlay').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('show');
+      document.body.style.overflow = '';
+      // リセット
+      document.getElementById('quickMode').style.display = 'block';
+      document.getElementById('detailMode').style.display = 'none';
+      document.getElementById('successMessage').style.display = 'none';
+    }
+
+    function closeModalOnOverlay(event) {
+      if (event.target === event.currentTarget) {
+        closeModal();
+      }
+    }
+
+    function showDetailMode() {
+      document.getElementById('quickMode').style.display = 'none';
+      document.getElementById('detailMode').style.display = 'block';
+    }
+
+    function showQuickMode() {
+      document.getElementById('quickMode').style.display = 'block';
+      document.getElementById('detailMode').style.display = 'none';
+    }
+
+    function selectRating(rating) {
+      selectedRating = rating;
+      // すべてのボタンから選択状態を削除
+      document.querySelectorAll('.rating-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      // 選択されたボタンに選択状態を追加
+      event.target.classList.add('selected');
+    }
+
+    function quickSave() {
+      document.getElementById('quickMode').style.display = 'none';
+      document.getElementById('successMessage').style.display = 'block';
+
+      setTimeout(() => {
+        closeModal();
+      }, 2000);
+    }
+
+    function detailSave() {
+      document.getElementById('detailMode').style.display = 'none';
+      document.getElementById('successMessage').style.display = 'block';
+
+      setTimeout(() => {
+        closeModal();
+      }, 2000);
+    }
+
+    // ESCキーでモーダルを閉じる
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    // メニュートグル（モバイル用）
+    function toggleMenu() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    // サイドバー外をクリックしたら閉じる（モバイル用）
+    document.addEventListener('click', (e) => {
+      const sidebar = document.getElementById('sidebar');
+      const menuToggle = document.querySelector('.menu-toggle');
+
+      if (window.innerWidth <= 480) {
+        if (!sidebar.contains(e.target) && !menuToggle.contains(e.target) && sidebar.classList.contains('open')) {
+          sidebar.classList.remove('open');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -167,3 +167,4 @@ All apps use ESLint v9 with flat config format (`eslint.config.{js,mjs}`).
 - Web app runs on port 3000, admin on 3030, API on 8080 (configurable via PORT env var)
 - Terraform state is stored in S3 with DynamoDB locking (configured in bootstrap)
 - All documentation is in Japanese in `docs/setup/` directory
+- When Plan Feature, don't include duration
