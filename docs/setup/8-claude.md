@@ -71,6 +71,9 @@ MCP（Model Context Protocol）は、Claude Codeと外部ツールを連携さ�
 
 ```bash
 touch .mcp.json
+
+## もしuvをインストールしていない場合はserenaで使用するのでインストールする
+brew install uv
 ```
 
 ### 2. .mcp.jsonに追記
