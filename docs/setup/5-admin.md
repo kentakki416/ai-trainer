@@ -100,6 +100,9 @@
           "object-curly-spacing": ["error", "always"], // { foo } のようにスペースを入れる
           "semi": ["error", "never"], // セミコロンを禁止
           "quotes": ["error", "single"], // シングルクォートを強制
+          "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 0, "maxBOF": 0 }], // 連続する空行は最大1行、ファイルの先頭/末尾は0行
+          "padded-blocks": ["error", "never"], // ブロックの開始/終了での空行を禁止
+          "no-trailing-spaces": "error", // 行末のスペースを禁止
 
           // === Import順序 ===
           "import/order": [
@@ -209,7 +212,10 @@
     * `object-curly-spacing`: `{ }` 内にスペースを入れる
     * `semi`: セミコロンを使用しない
     * `quotes`: シングルクォート `'` を強制（ダブルクォート `"` を禁止）
-    
+    * `no-multiple-empty-lines`: 連続する空行は最大1行まで、ファイルの先頭/末尾は0行
+    * `padded-blocks`: ブロックの開始/終了での空行を禁止
+    * `no-trailing-spaces`: 行末のスペースを禁止
+
     **Import順序:**
     * `import/order`: import文をグループ化して順序を制御
       * 外部ライブラリ（`node_modules`）が最初

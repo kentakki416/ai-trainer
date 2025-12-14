@@ -6,9 +6,10 @@
 2. [プロジェクトの作成](#プロジェクトの作成)
 3. [package.jsonの設定](#packagejsonの設定)
 4. [TypeScript設定](#typescript設定)
-5. [APIスキーマの定義](#apiスキーマの定義)
-6. [各ワークスペースへのインストール](#各ワークスペースへのインストール)
-7. [実装例: APIサーバーとWebアプリでのスキーマ使用](#実装例-apiサーバーとwebアプリでのスキーマ使用)
+5. [ESLint設定](#eslint設定)
+6. [APIスキーマの定義](#apiスキーマの定義)
+7. [各ワークスペースへのインストール](#各ワークスペースへのインストール)
+8. [実装例: APIサーバーとWebアプリでのスキーマ使用](#実装例-apiサーバーとwebアプリでのスキーマ使用)
 
 ---
 
@@ -166,6 +167,219 @@ cd packages/schema
   // コンパイル対象から除外するディレクトリ
   "exclude": ["node_modules", "dist"]
 }
+```
+
+---
+
+## ESLint設定
+
+### 1. ESLint関連パッケージの追加
+
+`package.json`の`devDependencies`に以下のパッケージを追加します。
+
+```json
+{
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "@typescript-eslint/parser": "^8.18.2",
+    "eslint": "^9.17.0",
+    "eslint-import-resolver-typescript": "^3.7.0",
+    "eslint-plugin-import": "^2.31.0",
+    "typescript": "^5.3.3"
+  }
+}
+```
+
+### 2. lintスクリプトの追加
+
+`package.json`の`scripts`に以下を追加します。
+
+```json
+{
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint 'src/**/*.ts' --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
+```
+
+### 3. eslint.config.jsを作成
+
+`packages/schema/eslint.config.js`を作成して、以下の内容を記述します。
+
+```javascript
+const { defineConfig } = require('eslint/config')
+const typescriptEslint = require('@typescript-eslint/eslint-plugin')
+const typescriptParser = require('@typescript-eslint/parser')
+const importPlugin = require('eslint-plugin-import')
+
+module.exports = defineConfig([
+  {
+    files: ['**/*.ts'],
+    languageOptions: {
+      parser: typescriptParser,
+      parserOptions: {
+        ecmaVersion: 2020,
+        sourceType: 'module',
+        project: './tsconfig.json',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': typescriptEslint,
+      import: importPlugin,
+    },
+    settings: {
+      'import/resolver': {
+        typescript: {
+          alwaysTryTypes: true,
+          project: './tsconfig.json',
+        },
+      },
+    },
+    rules: {
+      // === Console ===
+      'no-console': ['warn', { allow: ['warn', 'error'] }], // console.log は警告、warn/error は許可
+
+      // === 未使用変数 ===
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',  // _で始まる引数は除外
+        varsIgnorePattern: '^_',  // _で始まる変数は除外
+      }],
+
+      // === コードスタイル ===
+      'object-curly-spacing': ['error', 'always'],  // { foo } のようにスペースを入れる
+      'semi': ['error', 'never'],                   // セミコロンを禁止
+      'quotes': ['error', 'single'],                 // シングルクォートを強制
+      'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0, maxBOF: 0 }], // 連続する空行は最大1行、ファイルの先頭/末尾は0行
+      'padded-blocks': ['error', 'never'], // ブロックの開始/終了での空行を禁止
+      'no-trailing-spaces': 'error', // 行末のスペースを禁止
+
+      // === Import順序 ===
+      'import/order': [
+        'error',
+        {
+          groups: [
+            'builtin',   // Node.jsの組み込みモジュール（例: fs, path）
+            'external',  // 外部ライブラリ（node_modules）
+            'internal',  // 内部モジュール（@repo/など）
+            'parent',    // 親ディレクトリからのインポート
+            'sibling',  // 同じディレクトリまたは兄弟ディレクトリからのインポート
+            'index',    // カレントディレクトリのindexファイル
+          ],
+          'newlines-between': 'always', // グループ間に改行を挿入
+          alphabetize: {
+            order: 'asc', // 各グループ内でアルファベット順にソート
+            caseInsensitive: true, // 大文字小文字を区別しない
+          },
+          pathGroups: [
+            {
+              pattern: '@repo/**',
+              group: 'internal',
+              position: 'before',
+            },
+          ],
+          pathGroupsExcludedImportTypes: ['builtin'],
+        },
+      ],
+
+      // === オブジェクトキーの順序 ===
+      'sort-keys': ['error', 'asc', {
+        caseSensitive: true,   // 大文字小文字を区別
+        natural: false,        // 自然順ソートを無効化
+        minKeys: 2,            // 2つ以上のキーがある場合のみ適用
+      }],
+
+      // === TypeScript: 型安全性 ===
+      '@typescript-eslint/no-explicit-any': 'warn',                    // any型は警告
+      '@typescript-eslint/no-empty-function': 'error',                 // 空の関数を禁止
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',     // 不要な型アサーションを禁止
+      '@typescript-eslint/promise-function-async': 'warn',             // Promiseを返す関数はasyncに
+
+      // === TypeScript: 命名規則 ===
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: 'variable',
+          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],  // 変数: camelCase, UPPER_CASE, PascalCase
+        },
+        {
+          selector: 'function',
+          format: ['camelCase', 'PascalCase'],                 // 関数: camelCase, PascalCase
+        },
+        {
+          selector: 'typeLike',
+          format: ['PascalCase'],                              // 型: PascalCase
+        },
+      ],
+
+      // === コード品質: 比較と構文 ===
+      'eqeqeq': ['error', 'always'],           // === と !== を強制（== と != を禁止）
+      'no-return-await': 'error',              // 不要な return await を禁止
+      'no-var': 'error',                       // var を禁止（const/let を使用）
+      'prefer-const': 'error',                 // 再代入しない変数は const にする
+      'prefer-template': 'error',              // 文字列結合ではなくテンプレートリテラルを使用
+      'prefer-arrow-callback': 'error',        // コールバック関数はアロー関数にする
+      'no-unneeded-ternary': 'error',          // 不要な三項演算子を禁止（例: x ? true : false → x）
+    },
+  },
+  {
+    ignores: ['node_modules/**', 'dist/**'],
+  },
+])
+```
+
+＜解説＞
+
+**コードスタイル:**
+* `object-curly-spacing`: `{ }` 内にスペースを入れる
+* `semi`: セミコロンを使用しない
+* `quotes`: シングルクォート `'` を強制（ダブルクォート `"` を禁止）
+* `no-multiple-empty-lines`: 連続する空行は最大1行まで、ファイルの先頭/末尾は0行
+* `padded-blocks`: ブロックの開始/終了での空行を禁止
+* `no-trailing-spaces`: 行末のスペースを禁止
+
+**Import順序:**
+* `import/order`: import文をグループ化して順序を制御
+  * 外部ライブラリ（`node_modules`）が最初
+  * 自分のpackages（`@repo/**`）がその後に配置
+  * グループ間に改行を自動挿入
+  * 各グループ内でアルファベット順にソート
+
+**TypeScript型安全性:**
+* `@typescript-eslint/no-explicit-any`: any型の使用を警告
+* `@typescript-eslint/no-empty-function`: 空の関数を禁止
+* `@typescript-eslint/no-unnecessary-type-assertion`: 不要な型アサーションを禁止
+* `@typescript-eslint/promise-function-async`: Promiseを返す関数はasyncにする
+* `@typescript-eslint/naming-convention`: 命名規則（変数はcamelCase/UPPER_CASE/PascalCase、関数はcamelCase/PascalCase、型はPascalCase）
+
+**コード品質:**
+* `eqeqeq`: === と !== を強制（== と != を禁止）
+* `no-var`: var禁止（const/letを使用）
+* `prefer-const`: 再代入しない変数はconstにする
+* `prefer-template`: テンプレートリテラル優先
+* `prefer-arrow-callback`: アロー関数優先
+* `no-unneeded-ternary`: 不要な三項演算子を禁止
+
+### 4. パッケージをインストール
+
+プロジェクトルートで`pnpm install`を実行します。
+
+```bash
+# プロジェクトルートに移動
+cd ../..
+pnpm install
+```
+
+### 5. Lintを実行
+
+```bash
+cd packages/schema
+pnpm run lint
 ```
 
 ---
