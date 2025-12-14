@@ -1,11 +1,15 @@
 import 'dotenv/config'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaMariaDb } from '@prisma/adapter-mariadb'
 
 import { PrismaClient } from './generated/client'
 
-const connectionString = `${process.env.DATABASE_URL}`
+const adapter = new PrismaMariaDb({
+  connectionLimit: Number(process.env.DB_CONNECTION_LIMIT) || 5,
+  database: process.env.DB_NAME || 'ai_trainer_dev',
+  host: process.env.DB_HOST || 'localhost',
+  password: process.env.DB_PASSWORD || 'password',
+  port: Number(process.env.DB_PORT) || 3306,
+  user: process.env.DB_USER || 'root',
+})
 
-const adapter = new PrismaPg({ connectionString })
-const prisma = new PrismaClient({ adapter })
-
-export { prisma }
+export const prisma = new PrismaClient({ adapter })

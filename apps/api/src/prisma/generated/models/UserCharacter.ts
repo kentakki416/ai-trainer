@@ -276,6 +276,7 @@ export type UserCharacterOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   character?: Prisma.CharacterOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
+  _relevance?: Prisma.UserCharacterOrderByRelevanceInput
 }
 
 export type UserCharacterWhereUniqueInput = Prisma.AtLeast<{
@@ -414,6 +415,12 @@ export type UserCharacterListRelationFilter = {
 
 export type UserCharacterOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type UserCharacterOrderByRelevanceInput = {
+  fields: Prisma.UserCharacterOrderByRelevanceFieldEnum | Prisma.UserCharacterOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type UserCharacterCountOrderByAggregateInput = {
@@ -765,33 +772,7 @@ export type UserCharacterSelect<ExtArgs extends runtime.Types.Extensions.Interna
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["userCharacter"]>
 
-export type UserCharacterSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  userId?: boolean
-  characterCode?: boolean
-  nickName?: boolean
-  level?: boolean
-  experience?: boolean
-  isActive?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
-  character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["userCharacter"]>
 
-export type UserCharacterSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  userId?: boolean
-  characterCode?: boolean
-  nickName?: boolean
-  level?: boolean
-  experience?: boolean
-  isActive?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
-  character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["userCharacter"]>
 
 export type UserCharacterSelectScalar = {
   id?: boolean
@@ -807,14 +788,6 @@ export type UserCharacterSelectScalar = {
 
 export type UserCharacterOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "characterCode" | "nickName" | "level" | "experience" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["userCharacter"]>
 export type UserCharacterInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-}
-export type UserCharacterIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-}
-export type UserCharacterIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   character?: boolean | Prisma.CharacterDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -953,30 +926,6 @@ export interface UserCharacterDelegate<ExtArgs extends runtime.Types.Extensions.
   createMany<T extends UserCharacterCreateManyArgs>(args?: Prisma.SelectSubset<T, UserCharacterCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many UserCharacters and returns the data saved in the database.
-   * @param {UserCharacterCreateManyAndReturnArgs} args - Arguments to create many UserCharacters.
-   * @example
-   * // Create many UserCharacters
-   * const userCharacter = await prisma.userCharacter.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many UserCharacters and only return the `id`
-   * const userCharacterWithIdOnly = await prisma.userCharacter.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends UserCharacterCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, UserCharacterCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserCharacterPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a UserCharacter.
    * @param {UserCharacterDeleteArgs} args - Arguments to delete one UserCharacter.
    * @example
@@ -1039,36 +988,6 @@ export interface UserCharacterDelegate<ExtArgs extends runtime.Types.Extensions.
    * 
    */
   updateMany<T extends UserCharacterUpdateManyArgs>(args: Prisma.SelectSubset<T, UserCharacterUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more UserCharacters and returns the data updated in the database.
-   * @param {UserCharacterUpdateManyAndReturnArgs} args - Arguments to update many UserCharacters.
-   * @example
-   * // Update many UserCharacters
-   * const userCharacter = await prisma.userCharacter.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more UserCharacters and only return the `id`
-   * const userCharacterWithIdOnly = await prisma.userCharacter.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends UserCharacterUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, UserCharacterUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserCharacterPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one UserCharacter.
@@ -1502,29 +1421,6 @@ export type UserCharacterCreateManyArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
- * UserCharacter createManyAndReturn
- */
-export type UserCharacterCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the UserCharacter
-   */
-  select?: Prisma.UserCharacterSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the UserCharacter
-   */
-  omit?: Prisma.UserCharacterOmit<ExtArgs> | null
-  /**
-   * The data used to create many UserCharacters.
-   */
-  data: Prisma.UserCharacterCreateManyInput | Prisma.UserCharacterCreateManyInput[]
-  skipDuplicates?: boolean
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserCharacterIncludeCreateManyAndReturn<ExtArgs> | null
-}
-
-/**
  * UserCharacter update
  */
 export type UserCharacterUpdateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1566,36 +1462,6 @@ export type UserCharacterUpdateManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many UserCharacters to update.
    */
   limit?: number
-}
-
-/**
- * UserCharacter updateManyAndReturn
- */
-export type UserCharacterUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the UserCharacter
-   */
-  select?: Prisma.UserCharacterSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the UserCharacter
-   */
-  omit?: Prisma.UserCharacterOmit<ExtArgs> | null
-  /**
-   * The data used to update UserCharacters.
-   */
-  data: Prisma.XOR<Prisma.UserCharacterUpdateManyMutationInput, Prisma.UserCharacterUncheckedUpdateManyInput>
-  /**
-   * Filter which UserCharacters to update
-   */
-  where?: Prisma.UserCharacterWhereInput
-  /**
-   * Limit how many UserCharacters to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserCharacterIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

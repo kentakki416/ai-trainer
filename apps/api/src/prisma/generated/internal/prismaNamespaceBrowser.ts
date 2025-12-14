@@ -137,18 +137,47 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
-export const QueryMode = {
-  default: 'default',
-  insensitive: 'insensitive'
-} as const
-
-export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
-
-
 export const NullsOrder = {
   first: 'first',
   last: 'last'
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const UserOrderByRelevanceFieldEnum = {
+  email: 'email',
+  name: 'name',
+  avatarUrl: 'avatarUrl'
+} as const
+
+export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
+
+
+export const AccountOrderByRelevanceFieldEnum = {
+  provider: 'provider',
+  providerAccountId: 'providerAccountId',
+  accessToken: 'accessToken',
+  refreshToken: 'refreshToken',
+  tokenType: 'tokenType',
+  scope: 'scope',
+  idToken: 'idToken'
+} as const
+
+export type AccountOrderByRelevanceFieldEnum = (typeof AccountOrderByRelevanceFieldEnum)[keyof typeof AccountOrderByRelevanceFieldEnum]
+
+
+export const CharacterOrderByRelevanceFieldEnum = {
+  name: 'name',
+  description: 'description'
+} as const
+
+export type CharacterOrderByRelevanceFieldEnum = (typeof CharacterOrderByRelevanceFieldEnum)[keyof typeof CharacterOrderByRelevanceFieldEnum]
+
+
+export const UserCharacterOrderByRelevanceFieldEnum = {
+  nickName: 'nickName'
+} as const
+
+export type UserCharacterOrderByRelevanceFieldEnum = (typeof UserCharacterOrderByRelevanceFieldEnum)[keyof typeof UserCharacterOrderByRelevanceFieldEnum]
 
