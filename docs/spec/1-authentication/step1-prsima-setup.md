@@ -18,7 +18,7 @@ generator client {
 
 // Data source
 datasource db {
-    provider = "postgresql"
+    provider = "mysql"
 }
 
 // ユーザー（認証プロバイダー非依存）
@@ -159,7 +159,7 @@ NODE_ENV=development
 CORS_ORIGIN=http://localhost:3000
 
 # Database
-DATABASE_URL="postgresql://postgres:password@localhost:5432/ai_trainer_dev"
+DATABASE_URL="mysql://root:password@localhost:3306/ai_trainer_dev"
 
 # Google OAuth
 GOOGLE_CLIENT_ID="your-client-id"
@@ -177,34 +177,50 @@ JWT_EXPIRATION=7d
 FRONTEND_URL="http://localhost:3000"
 ```
 
-#### 1-3. マイグレーション実行
+#### 1-4. 必要なパッケージをインストール
 
 ```bash
+cd apps/api
+pnpm add @prisma/adapter-mariadb
+```
+
+#### 1-5 PrismaClientを生成
+```bash
 cd apps/api/src/prisma
-npx prisma migrate dev --name init
 npx prisma generate
 ```
 
-#### 1-4. prisma.client.tsの作成
+#### 1-6. prisma.client.tsの作成
 クライアントをexportするためのファイルを追加
 
 **ファイル**: `apps/api/src/prisma/prisma.client.ts`
 
 ```typescript
 import 'dotenv/config'
-import { PrismaPg } from '@prisma/adapter-pg'
+import { PrismaMariaDb } from '@prisma/adapter-mariadb'
 
 import { PrismaClient } from './generated/client'
 
-const connectionString = `${process.env.DATABASE_URL}`
+const adapter = new PrismaMariaDb({
+  connectionLimit: Number(process.env.DB_CONNECTION_LIMIT) || 5,
+  database: process.env.DB_NAME || 'ai_trainer_dev',
+  host: process.env.DB_HOST || 'localhost',
+  password: process.env.DB_PASSWORD || 'password',
+  port: Number(process.env.DB_PORT) || 3306,
+  user: process.env.DB_USER || 'root',
+})
 
-const adapter = new PrismaPg({ connectionString })
-const prisma = new PrismaClient({ adapter })
-
-export { prisma }
+export const prisma = new PrismaClient({ adapter })
 ```
 
-#### 1-5. 初期データの投入（Character）
+#### 1-7. マイグレーション実行
+
+```bash
+cd apps/api/src/prisma
+npx prisma migrate dev --name init
+```
+
+#### 1-8. 初期データの投入（Character）
 
 マイグレーション後、キャラクターマスターデータを投入します。
 
@@ -269,7 +285,7 @@ npx prisma db seed
 ```bash
 # Prisma Studioでテーブルを確認
 cd apps/api
-npx prisma studio --url postgresql://postgres:password@localhost:5432/ai_trainer_dev  
+npx prisma studio --url mysql://mysql:password@localhost:3306/ai_trainer_dev
 # ブラウザで http://localhost:5555 にアクセス
 # users, character_masters, user_characters テーブルが表示されることを確認
 ```
