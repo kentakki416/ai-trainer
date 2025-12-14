@@ -11,6 +11,7 @@ export const errorResponseSchema = z.object({
 export type ErrorResponse = z.infer<typeof errorResponseSchema>
 
 export * from './auth'
+export * from './user'
 
 // 今後、他のAPIスキーマを追加する場合はここに追記
 // export * from './post'

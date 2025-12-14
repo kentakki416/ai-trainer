@@ -15,7 +15,7 @@ Repository パターンは、データアクセスロジックをビジネスロ
 
 ## 実装手順
 
-### 1. User Repository 作成
+### User Repository 作成
 
 **ファイル**: `apps/api/src/repository/mysql/user.ts`
 
@@ -68,7 +68,7 @@ export class PrismaUserRepository implements UserRepository {
 - `findById` と `findByEmail` は存在しない場合 `null` を返す
 - Prisma Client のimportパスは `../../prisma/generated/client` を使用
 
-### 2. AuthAccount Repository 作成
+### AuthAccount Repository 作成
 
 **ファイル**: `apps/api/src/repository/mysql/auth-account.ts`
 
@@ -147,7 +147,7 @@ export class PrismaAuthAccountRepository implements AuthAccountRepository {
 - `CreateAccountInput` は **type** で定義（Union 型を含む可能性があるため。README.md のベストプラクティスに従う）
 - Prisma Client のimportパスは `../../prisma/generated/client` を使用
 
-### 3. UserCharacter Repository 作成
+### UserCharacter Repository 作成
 
 **ファイル**: `apps/api/src/repository/mysql/user-character.ts`
 

@@ -168,3 +168,32 @@ All apps use ESLint v9 with flat config format (`eslint.config.{js,mjs}`).
 - Terraform state is stored in S3 with DynamoDB locking (configured in bootstrap)
 - All documentation is in Japanese in `docs/setup/` directory
 - When Plan Feature, don't include duration
+
+## Documentation Guidelines
+
+### Specification and Design Documents (`docs/spec/`)
+
+仕様書・設計書は `docs/spec/` ディレクトリに配置します。AI が仕様書を作成・更新する際は以下のルールに従ってください。
+
+#### ファイル構成
+- 機能単位でディレクトリを作成（例: `docs/spec/auth/`, `docs/spec/payment/`）
+- 各機能は **テスト可能な最小単位** でステップファイルに分割
+- API、Web、Mobile など複数のアプリに跨る場合でも、テスト可能な単位で分割
+- README.mdには機能単位の設計書を記述して欲しいです。
+
+#### stepファイルの記述ルール
+- **実装手順に番号を振らない**
+- 各ステップファイルには以下のセクションを含める:
+  - **対応内容**: 実装する内容の詳細（コード例、API仕様など）
+  - **動作確認**: テストコードや動作確認の方法
+- 全て日本語で記述
+
+#### テンプレート
+`docs/spec/template/1-step.md` にステップファイルのテンプレートがあります。
+
+#### README.mdファイルの記述ルール
+- 全て日本語で記述
+
+
+#### テンプレート
+`docs/spec/template/README.md` にREADME.mdファイルのテンプレートがあります。

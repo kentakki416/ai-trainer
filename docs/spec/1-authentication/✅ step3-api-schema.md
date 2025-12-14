@@ -15,7 +15,7 @@ API のリクエスト/レスポンスのスキーマを `@repo/api-schema` パ�
 
 ## 実装手順
 
-### 1. Auth スキーマ定義
+### Auth スキーマ定義
 
 **ファイル**: `packages/schema/src/api-schema/auth.ts`
 
@@ -75,7 +75,7 @@ export type AuthMeResponse = z.infer<typeof authMeResponseSchema>
 - `created_at` は ISO 8601 形式の文字列（例: `2024-01-01T00:00:00.000Z`）
 - nullable なフィールドは `.nullable()` を使用
 
-### 2. 共通スキーマ定義
+### 共通スキーマ定義
 
 **ファイル**: `packages/schema/src/api-schema/index.ts`
 
@@ -107,7 +107,7 @@ export * from './auth'
 - `index.ts` で直接定義することで、auth 以外の API でも使用可能
 - `export * from './auth'` で auth スキーマを全てエクスポート
 
-### 3. スキーマパッケージのビルド
+### スキーマパッケージのビルド
 
 スキーマを変更した場合は、必ずビルドを実行してください：
 

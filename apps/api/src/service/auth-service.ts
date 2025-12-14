@@ -3,7 +3,8 @@ import { generateToken } from '../lib/jwt'
 import { CharacterCode, User } from '../prisma/generated/client'
 import {
     AuthAccountRepository,
-    UserRegistrationRepository
+    UserRegistrationRepository,
+    UserRepository,
 } from '../repository/mysql'
 
 export type AuthenticateWithGoogleResult = {
@@ -39,7 +40,7 @@ export const authenticateWithGoogle = async (
     } else {
         isNewUser = true
 
-        // 新規ユーザー、アカウント、キャラクターを作成z
+        // 新規ユーザー、アカウント、キャラクターを作成
         user = await userRegistrationRepository.createUserWithAuthAccountAndUserCharacterTx({
             authAccount: {
                 provider: 'google',
@@ -66,4 +67,14 @@ export const authenticateWithGoogle = async (
         jwtToken,
         user
     }
+}
+
+/**
+ * ユーザーIDからユーザー情報を取得
+ */
+export const getUserById = async (
+    userId: number,
+    userRepository: UserRepository
+): Promise<User | null> => {
+    return userRepository.findById(userId)
 }

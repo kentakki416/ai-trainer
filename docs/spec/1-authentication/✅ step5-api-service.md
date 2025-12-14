@@ -4,7 +4,7 @@
 ビジネスロジックを実装し、認証フローの核となる処理を作成する。Service 層は Repository 層と Client 層を組み合わせて、実際の業務ロジックを実現します。
 ## 実装手順
 
-### 1. JWT ユーティリティ作成
+### JWT ユーティリティ作成
 
 **ファイル**: `apps/api/src/lib/jwt.ts`
 
@@ -55,7 +55,7 @@ export const verifyToken = (token: string): JWTPayload | null => {
    - 検証失敗時は `null` を返す（例外をスローしない）
    - Controller 層で適切なエラーハンドリングを行う
 
-### 2. Auth Service 作成
+### Auth Service 作成
 
 **ファイル**: `apps/api/src/service/auth-service.ts`
 
@@ -160,7 +160,7 @@ export const getUserById = async (
    - User、AuthAccount、UserCharacter の作成が 1 つのトランザクションで実行される
    - データ不整合を防ぎ、原子性を保証
 
-### 3. User Registration Repository 作成（集約）
+### User Registration Repository 作成（集約）
 
 新規ユーザー登録のためのトランザクション処理を Repository 層に集約します。
 

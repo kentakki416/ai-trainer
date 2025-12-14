@@ -9,7 +9,7 @@
 
 ## 実装手順
 
-### 1. Auth Route 作成
+### Auth Route 作成
 
 **ファイル**: `apps/api/src/route/auth-route.ts`
 
@@ -53,7 +53,7 @@ export const authRouter = (
 - `/me` エンドポイントには `authMiddleware` を適用（認証必須）
 - 各エンドポイントで Controller の `execute` メソッドを呼び出し
 
-### 2. index.ts で DI + サーバー起動
+### index.ts で DI + サーバー起動
 
 **ファイル**: `apps/api/src/index.ts`
 
@@ -171,7 +171,7 @@ process.on('SIGTERM', async () => {
    - `SIGTERM` シグナルを受け取ったら Prisma Client を切断して終了
    - Kubernetes などのコンテナ環境で必要
 
-### 3. 必要なパッケージのインストール
+### 必要なパッケージのインストール
 
 CORS サポートを追加するため、`cors` パッケージをインストールします：
 
@@ -183,7 +183,7 @@ pnpm add -D @types/cors
 
 ## 動作確認
 
-### 1. API サーバー起動
+### API サーバー起動
 
 ```bash
 cd apps/api
@@ -196,7 +196,7 @@ pnpm dev
 API server running on http://localhost:8080
 ```
 
-### 2. Google OAuth フローのテスト
+### Google OAuth フローのテスト
 
 1. ブラウザで以下の URL にアクセス：
    ```
@@ -217,7 +217,7 @@ API server running on http://localhost:8080
    - `accounts` テーブルに Google アカウント情報が保存されている
    - `user_characters` テーブルにデフォルトキャラクター（トレちゃん）が作成されている
 
-### 3. `/api/auth/me` エンドポイントのテスト
+### `/api/auth/me` エンドポイントのテスト
 
 トークンを取得したら、以下のコマンドで現在のユーザー情報を取得できます：
 
@@ -239,7 +239,7 @@ curl -H "Authorization: Bearer YOUR_TOKEN_HERE" http://localhost:8080/api/auth/m
 
 ## セキュリティに関する注意事項
 
-### 1. トークンの URL パラメータ送信
+### トークンの URL パラメータ送信
 
 現在の実装では、認証成功後にトークンを URL パラメータとして送信しています：
 
@@ -257,11 +257,11 @@ res.redirect(`${this.frontendUrl}/auth/callback?token=${result.token}`)
 2. **Authorization Code Flow**: 一時的なコードを発行し、フロントエンドから API を呼び出してトークンを取得
 3. **POST リクエストでトークン送信**: リダイレクトではなく、フロントエンドが API を呼び出す形式
 
-### 2. 環境変数の必須チェック
+### 環境変数の必須チェック
 
 JWT_SECRET、GOOGLE_CLIENT_ID などの重要な環境変数は、アプリケーション起動時にチェックし、未設定の場合はエラーをスローします。これにより、本番環境でのデフォルト値使用を防ぎます。
 
-### 3. CORS 設定
+### CORS 設定
 
 本番環境では、`origin` を適切に設定し、信頼できるドメインのみを許可してください：
 
@@ -289,7 +289,7 @@ app.use(
 )
 ```
 
-### 4. HTTPS の使用
+### HTTPS の使用
 
 本番環境では、必ず HTTPS を使用してください：
 

@@ -5,7 +5,7 @@ Google OAuth 認証を行うためのクライアントを実装する。この�
 
 ## 実装手順
 
-### 1. 依存パッケージインストール
+### 依存パッケージインストール
 
 Google OAuth 認証と JWT トークン生成に必要なパッケージをインストールします：
 
@@ -20,7 +20,7 @@ pnpm add -D @types/jsonwebtoken
 - `jsonwebtoken`: JWT トークンの生成・検証ライブラリ
 - `@types/jsonwebtoken`: jsonwebtoken の TypeScript 型定義
 
-### 2. Google OAuth Client 作成
+### Google OAuth Client 作成
 
 **ファイル**: `apps/api/src/client/google-auth.ts`
 
@@ -124,7 +124,7 @@ export class GoogleOAuthClient {
 
 
 
-### 3. 環境変数の設定
+### 環境変数の設定
 
 Google OAuth を使用するには、Google Cloud Console で OAuth 2.0 クライアント ID を作成し、以下の環境変数を設定する必要があります。
 
@@ -148,7 +148,7 @@ FRONTEND_URL=http://localhost:3000
 - `.env.local` ファイルは `.gitignore` に含まれているため、Git にコミットされません
 - 本番環境では、環境変数を安全に管理してください（AWS Secrets Manager、環境変数設定など）
 
-### 4. Google Cloud Console での設定
+### Google Cloud Console での設定
 
 1. [Google Cloud Console](https://console.cloud.google.com/) にアクセス
 2. プロジェクトを作成（または既存のプロジェクトを選択）
@@ -160,15 +160,15 @@ FRONTEND_URL=http://localhost:3000
 
 ## セキュリティに関する注意事項
 
-### 1. Client Secret の管理
+### Client Secret の管理
 - `GOOGLE_CLIENT_SECRET` は絶対に公開リポジトリにコミットしないこと
 - `.env.local` ファイルを `.gitignore` に追加していることを確認
 
-### 2. リダイレクト URI の検証
+### リダイレクト URI の検証
 - Google Cloud Console で設定したリダイレクト URI と、実際のコールバック URL が一致していることを確認
 - 本番環境では HTTPS を使用すること
 
-### 3. スコープの最小化
+### スコープの最小化
 - 必要最低限のスコープのみを要求する
 - 現在は `email` と `profile` のみを要求
 
