@@ -1,0 +1,93 @@
+// Generator
+generator client {
+    provider = "prisma-client"
+    output = "./generated"
+}
+
+// Data source
+datasource db {
+    provider = "mysql"
+}
+
+// ユーザー（認証プロバイダー非依存）
+model User {
+    id        Int      @id @default(autoincrement())
+    email     String?  @unique
+    name      String?
+    avatarUrl String?  @map("avatar_url")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    accounts       Account[]
+    userCharacters UserCharacter[]
+
+    @@map("users")
+}
+
+// 認証プロバイダー
+enum Provider {
+    GOOGLE
+    GITHUB
+    CREDENTIALS
+}
+
+// 認証アカウント（複数プロバイダー対応）
+model Account {
+    id                Int      @id @default(autoincrement())
+    userId            Int      @map("user_id")
+    provider          String   // "google", "github", "credentials" など
+    providerAccountId String   @map("provider_account_id") // プロバイダー側のユーザーID
+    accessToken       String?  @map("access_token") @db.Text
+    refreshToken      String?  @map("refresh_token") @db.Text
+    expiresAt         Int?     @map("expires_at")
+    tokenType         String?  @map("token_type")
+    scope             String?
+    idToken           String?  @map("id_token") @db.Text
+    createdAt         DateTime @default(now()) @map("created_at")
+    updatedAt         DateTime @updatedAt @map("updated_at")
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+    @@index([userId])
+    @@map("accounts")
+}
+
+// キャラクターコード
+enum CharacterCode {
+    TRAECHAN
+    MASTER
+}
+
+// キャラクターマスター
+model Character {
+    characterCode CharacterCode @id @map("character_code")
+    name String @db.VarChar(100)
+    description String @db.Text
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    userCharacters UserCharacter[]
+
+    @@map("characters")
+}
+
+// ユーザーが保持するキャラクター
+model UserCharacter {
+    id Int @id @default(autoincrement())
+    userId Int @map("user_id")
+    characterCode CharacterCode @map("character_code")
+    nickName String @db.VarChar(100) @map("nick_name")
+    level Int @default(1) 
+    experience Int @default(0)
+    isActive Boolean @default(false) @map("is_active")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
+
+    character Character @relation(fields: [characterCode], references: [characterCode], onDelete: Restrict)
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId, isActive])
+    @@index([characterCode])
+    @@map("user_characters")
+}

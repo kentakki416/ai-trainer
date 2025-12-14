@@ -9,7 +9,7 @@ Express.js + TypeScript による API サーバー
 ```
 apps/api/
 ├── src/
-│   ├── index.ts                              # エントリーポイント、DI、サーバー起動等...
+│   ├── index.ts                              # エントリーポイント、DI、サーバー起動等
 │   ├── route/                                # ルーティング定義
 │   │   ├── user-route.ts                     # 
 │   │   └── payment-route.ts                  # 
@@ -507,4 +507,22 @@ pnpm start
 # リント
 pnpm lint
 pnpm lint:fix
+```
+
+## primsaコマンド
+```bash
+# マイグレーションファイルの作成・実行
+cd src/prisma
+npx prisma migarete dev --name <migrationファイル名>
+
+# クライアントの生成
+cd src/prisma
+nxp prisma generate
+
+# シードの実行
+cd src/prisma
+npx prisma db seed
+
+# studioの起動
+npx prisma studio --url postgresql://postgres:password@localhost:5432/ai_trainer_dev  
 ```

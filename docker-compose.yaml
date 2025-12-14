@@ -1,0 +1,85 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: ai-trainer-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: ai_trainer_dev
+      MYSQL_USER: mysql
+      MYSQL_PASSWORD: password
+      TZ: Asia/Tokyo
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=caching_sha2_password
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-ppassword']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: ai-trainer-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # API Server (Future)
+  # Uncomment when ready to containerize the API server
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: apps/api/Dockerfile
+  #   container_name: ai-trainer-api
+  #   restart: unless-stopped
+  #   environment:
+  #     NODE_ENV: development
+  #     PORT: 8080
+  #     DATABASE_URL: mysql://mysql:password@mysql:3306/ai_trainer_dev
+  #     REDIS_URL: redis://redis:6379
+  #     CORS_ORIGIN: http://localhost:3000
+  #     JWT_SECRET: your-secret-key-change-in-production
+  #     JWT_EXPIRATION: 7d
+  #   ports:
+  #     - '8080:8080'
+  #   volumes:
+  #     - ./apps/api:/app/apps/api
+  #     - /app/node_modules
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   networks:
+  #     - app-network
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge

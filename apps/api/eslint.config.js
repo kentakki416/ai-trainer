@@ -40,6 +40,9 @@ module.exports = defineConfig([
       'object-curly-spacing': ['error', 'always'],  // { foo } のようにスペースを入れる
       'quotes': ['error', 'single'],                 // シングルクォートを強制
       'semi': ['error', 'never'],                   // セミコロンを禁止
+      'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0, maxBOF: 0 }], // 連続する空行は最大1行、ファイルの先頭/末尾は0行
+      'padded-blocks': ['error', 'never'], // ブロックの開始/終了での空行を禁止
+      'no-trailing-spaces': 'error', // 行末のスペースを禁止
       
       // === Import順序 ===
       'import/order': [
@@ -110,7 +113,7 @@ module.exports = defineConfig([
     },
   },
   {
-    ignores: ['dist/**', 'node_modules/**'],
+    ignores: ['dist/**', 'node_modules/**', 'src/prisma/generated/**'],
   },
 ])
 
