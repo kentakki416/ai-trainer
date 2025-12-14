@@ -18,7 +18,7 @@ model User {
     createdAt DateTime @default(now()) @map("created_at")
     updatedAt DateTime @updatedAt @map("updated_at")
 
-    accounts       Account[]
+    accounts       AuthAccount[]
     userCharacters UserCharacter[]
 
     @@map("users")
@@ -32,7 +32,7 @@ enum Provider {
 }
 
 // 認証アカウント（複数プロバイダー対応）
-model Account {
+model AuthAccount {
     id                Int      @id @default(autoincrement())
     userId            Int      @map("user_id")
     provider          String   // "google", "github", "credentials" など
@@ -50,7 +50,7 @@ model Account {
 
     @@unique([provider, providerAccountId])
     @@index([userId])
-    @@map("accounts")
+    @@map("auth_accounts")
 }
 
 // キャラクターコード

@@ -43,10 +43,10 @@ export { Prisma }
  */
 export type User = Prisma.UserModel
 /**
- * Model Account
+ * Model AuthAccount
  * 
  */
-export type Account = Prisma.AccountModel
+export type AuthAccount = Prisma.AuthAccountModel
 /**
  * Model Character
  * 

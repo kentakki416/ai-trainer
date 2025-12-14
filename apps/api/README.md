@@ -429,15 +429,14 @@ export class RedisCacheRepository implements CacheRepository {
 
 #### 5. Client (`client/`)
 - 外部 API への接続を抽象化
-- OpenAPI クライアント、決済基盤クライアントなど
-- **Interface を定義する**（Repository と同様の理由）
+- OpenAPI クライアント、決済基盤クライアント、OAuth プロバイダーなど
+- **Interface の使用はケースバイケース**（詳細は「Interface 使用ルール」を参照）
 - **Service に書かない**（データソースの抽象化として分離）
-- **Interface と実装は同じファイルに書く**（シンプル構成、実装が1つの場合）
+- **Interface を使う場合は、Interface と実装を同じファイルに書く**（シンプル構成）
 
-**例:**
+**例 1: Interface を使う場合（決済クライアント）**
 ```typescript
 // client/payment.ts
-// ✅ 推奨: 同じファイルに Interface と実装
 export interface PaymentClient {
   getPaymentInfo(userId: string): Promise<PaymentInfo>
   createCharge(amount: number): Promise<Charge>
@@ -452,6 +451,26 @@ export class StripePaymentClient implements PaymentClient {
 
   async createCharge(amount: number): Promise<Charge> {
     // Stripe API を呼び出し
+  }
+}
+```
+
+**例 2: Interface を使わない場合（Google OAuth）**
+```typescript
+// client/google-auth.ts
+export type GoogleAuthUrlOptions = {
+  accessType?: 'offline' | 'online'
+  prompt?: 'none' | 'consent' | 'select_account'
+  scope?: string[]
+}
+
+export class GoogleOAuthClient {
+  generateAuthUrl(options?: GoogleAuthUrlOptions): string {
+    // Google 固有の型安全な実装
+  }
+
+  async getUserInfo(code: string): Promise<GoogleUserInfo> {
+    // Google 固有の実装
   }
 }
 ```
@@ -480,16 +499,196 @@ export class PayPalPaymentClient implements PaymentClient { ... }
 
 ---
 
-### Interface を噛ませる判断基準
+### Interface を使う判断基準
 
-| 層 | Interface | 理由 |
+| 層 | Interface | 判断基準 |
 |---|---|---|
 | Controller | ❌ 不要 | Express に依存するため抽象化のメリットが薄い |
 | Service | ❌ 不要 | ビジネスロジックは通常切り替えない。関数のモックで十分 |
-| Repository | ✅ 必要 | テストしやすさ、DB 実装の切り替え可能性 |
-| Client | ✅ 必要 | テストしやすさ、外部 API の切り替え可能性 |
+| Repository | ✅ 推奨 | データベースの実装を差し替える可能性が高い（Prisma ↔ TypeORM など）|
+| Client | 🔶 ケースバイケース | 下記の詳細ルールを参照 |
 
 ---
+
+### Client 層の Interface 使用ルール（重要）
+
+Client 層では、以下の基準で Interface の使用を判断する：
+
+#### ✅ Interface を使う場合
+
+**条件:**
+- 複数の実装が実際に存在する、または近い将来追加する予定がある
+- プロバイダー間で API の形式が似ている（共通の抽象化が自然）
+
+**例: 決済クライアント（Stripe/PayPal）**
+```typescript
+// client/payment.ts
+export interface PaymentClient {
+  createCharge(amount: number): Promise<Charge>
+  refund(chargeId: string): Promise<void>
+}
+
+export class StripePaymentClient implements PaymentClient {
+  async createCharge(amount: number): Promise<Charge> {
+    // Stripe 固有の実装
+  }
+  async refund(chargeId: string): Promise<void> {
+    // Stripe 固有の実装
+  }
+}
+
+export class PayPalPaymentClient implements PaymentClient {
+  async createCharge(amount: number): Promise<Charge> {
+    // PayPal 固有の実装
+  }
+  async refund(chargeId: string): Promise<void> {
+    // PayPal 固有の実装
+  }
+}
+```
+
+**メリット:**
+- ✅ 実行時にプロバイダーを切り替え可能
+- ✅ テスト時にモック実装を注入しやすい
+- ✅ 依存性注入（DI）との相性が良い
+
+---
+
+#### ❌ Interface を使わない場合
+
+**条件:**
+- プロバイダー固有の API パラメータが多く、共通化すると型安全性が損なわれる
+- 近い将来も他のプロバイダーを追加する予定がない（YAGNI 原則）
+- 抽象化することで `Record<string, any>` のような汎用的な型になってしまう
+
+**例: Google OAuth クライアント**
+```typescript
+// client/google-auth.ts
+export type GoogleAuthUrlOptions = {
+  accessType?: 'offline' | 'online'         // Google 固有
+  prompt?: 'none' | 'consent' | 'select_account'  // Google 固有
+  scope?: string[]
+  state?: string
+}
+
+export class GoogleOAuthClient {
+  generateAuthUrl(options?: GoogleAuthUrlOptions): string {
+    // Google 固有の型安全な実装
+  }
+
+  async getUserInfo(code: string): Promise<GoogleUserInfo> {
+    // Google 固有の実装
+  }
+}
+```
+
+**将来 GitHub OAuth を追加する場合:**
+```typescript
+// client/github-auth.ts
+export type GitHubAuthUrlOptions = {
+  allowSignup?: boolean    // GitHub 固有
+  scope?: string[]
+  state?: string
+  // accessType や prompt は存在しない
+}
+
+export class GitHubOAuthClient {
+  generateAuthUrl(options?: GitHubAuthUrlOptions): string {
+    // GitHub 固有の型安全な実装
+  }
+
+  async getUserInfo(code: string): Promise<GitHubUserInfo> {
+    // GitHub 固有の実装
+  }
+}
+```
+
+**メリット:**
+- ✅ プロバイダー固有の型安全性を確保（リテラル型で厳密に定義）
+- ✅ 過度な抽象化を避け、シンプルに保つ
+- ✅ IDE の補完が正確に効く
+- ✅ テストはモックライブラリ（Jest など）で対応可能
+
+**デメリット:**
+- ❌ プロバイダーごとに独立した実装が必要
+- ❌ 真のポリモーフィズムは使えない（共通インターフェースでの統一的な扱いは不可。ファクトリーパターンなどで実行時の切り替え自体は可能だが、型ガードや条件分岐が必要）
+- ❌ テストは Jest の mock 機能に依存する（モック実装の DI ではなく、ライブラリレベルのモックが必要）
+
+---
+
+### Interface 使用のメリット・デメリット まとめ
+
+#### ✅ Interface を使うメリット
+1. **テストのしやすさ**: モック実装（Interface を実装したテスト用クラス）を DI で注入しやすい
+2. **実装の切り替え**: 実行時に異なる実装を使える（真のポリモーフィズム）
+3. **依存性の逆転**: 上位層が下位層の具象に依存しない（SOLID の D）
+4. **契約の明示**: インターフェースが API 契約として機能
+
+#### ❌ Interface を使うデメリット
+1. **型安全性の損失**: 汎用的な型（`Record<string, any>` など）になりやすい
+2. **過度な抽象化**: 実装が 1 つしかない場合は YAGNI 違反
+3. **複雑性の増加**: ファイル数が増え、理解が難しくなる
+4. **不要なメソッドの強制**: プロバイダー間で異なる機能を無理やり統一
+
+---
+
+### テストにおける違い（重要）
+
+#### ✅ Interface ありの場合: モック実装を DI
+
+```typescript
+// テストファイル
+class MockPaymentClient implements PaymentClient {
+  async createCharge(amount: number): Promise<Charge> {
+    return { id: 'mock-charge-id', amount }
+  }
+}
+
+// テストコード
+const mockClient = new MockPaymentClient()
+const service = new PaymentService(mockClient)  // DI で注入
+
+await service.processPayment(100)
+// モックの振る舞いをテストできる
+```
+
+**メリット:**
+- ✅ テストコードが読みやすい（実際のクラス構造を模倣）
+- ✅ Jest に依存しない（他のテストフレームワークでも使える）
+- ✅ モックの振る舞いを明示的に定義できる
+
+---
+
+#### ❌ Interface なしの場合: Jest の mock 機能を使用
+
+```typescript
+// テストファイル
+jest.mock('google-auth-library', () => ({
+  OAuth2Client: jest.fn().mockImplementation(() => ({
+    generateAuthUrl: jest.fn().mockReturnValue('https://mock-url.com'),
+    getToken: jest.fn().mockResolvedValue({
+      tokens: { access_token: 'mock-token' }
+    }),
+  })),
+}))
+
+// テストコード
+const client = new GoogleOAuthClient('id', 'secret', 'callback')
+const url = client.generateAuthUrl()
+expect(url).toBe('https://mock-url.com')
+```
+
+**デメリット:**
+- ❌ Jest に強く依存する（他のテストフレームワークに移行しづらい）
+- ❌ モックの設定が複雑になりがち（ライブラリ全体をモック）
+- ❌ テストコードが読みづらい場合がある
+
+**ただし、これでも十分テスト可能:**
+- Google OAuth のように単一実装で型安全性を優先する場合、このアプローチで問題ない
+- 実際の開発では Jest がデファクトスタンダードなので、実用上の問題は少ない
+
+---
+
 
 
 ## 開発コマンド
