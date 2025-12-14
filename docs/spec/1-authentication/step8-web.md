@@ -466,14 +466,6 @@ pnpm dev
 
 ---
 
-## 次のステップ
-
-認証機能が完成したら、次は **2. ロードマップ作成機能** の実装に進んでください。
-
-参照: `docs/phase1/spec/2-loadmap-create/IMPLEMENTATION.md`
-
----
-
 ## 📝 補足: アーキテクチャ参照
 
 ### API Server アーキテクチャ
