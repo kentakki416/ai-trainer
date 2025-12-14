@@ -1,4 +1,4 @@
-# Step 3: API - Repository 層
+# Step 4: API - Repository 層
 
 ## 目的
 データアクセス層（Repository）を実装し、データベース操作を抽象化する。各 Repository は特定のエンティティ（User、Account、UserCharacter）に対する CRUD 操作を提供します。

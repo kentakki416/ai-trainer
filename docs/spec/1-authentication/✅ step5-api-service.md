@@ -1,4 +1,4 @@
-# Step 3: API - Service 層
+# Step 5: API - Service 層
 
 ## 目的
 ビジネスロジックを実装し、認証フローの核となる処理を作成する。Service 層は Repository 層と Client 層を組み合わせて、実際の業務ロジックを実現します。
@@ -24,14 +24,14 @@ export type JWTPayload = {
     userId: number
 }
 
-export function generateToken(userId: number): string {
+export const generateToken = (userId: number): string => {
     const options = {
         expiresIn: JWT_EXPIRATION as SignOptions['expiresIn']
     }
     return jwt.sign({ userId }, JWT_SECRET, options)
 }
 
-export function verifyToken(token: string): JWTPayload | null {
+export const verifyToken = (token: string): JWTPayload | null => {
     try {
         return jwt.verify(token, JWT_SECRET) as JWTPayload
     } catch {
