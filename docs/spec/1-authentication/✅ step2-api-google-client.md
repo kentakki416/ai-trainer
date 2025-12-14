@@ -3,9 +3,6 @@
 ## 目的
 Google OAuth 認証を行うためのクライアントを実装する。このクライアントは、Google の認証 URL 生成とユーザー情報取得を担当します。
 
-## 実装箇所
-- `apps/api/src/client/google-auth.ts`
-
 ## 実装手順
 
 ### 1. 依存パッケージインストール
@@ -160,14 +157,6 @@ FRONTEND_URL=http://localhost:3000
 5. アプリケーションの種類: 「ウェブアプリケーション」
 6. 承認済みのリダイレクト URI: `http://localhost:8080/api/auth/google/callback` を追加
 7. クライアント ID とクライアントシークレットをコピーして `.env.local` に設定
-
-## ディレクトリ構造
-
-```
-apps/api/src/
-└── client/
-    └── google-auth.ts    # Google OAuth Client
-```
 
 ## セキュリティに関する注意事項
 
