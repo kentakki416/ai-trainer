@@ -3,10 +3,6 @@
 ## 目的
 API のリクエスト/レスポンスのスキーマを `@repo/api-schema` パッケージで定義し、フロントエンドと API サーバー間で型安全に共有する。
 
-## 実装箇所
-- `packages/schema/src/api-schema/auth.ts`
-- `packages/schema/src/api-schema/index.ts`
-
 ## なぜスキーマを共有するのか
 
 このプロジェクトでは、フロントエンド（Web/Admin/Mobile）と API サーバー間の通信における型安全性を保証するため、Zod スキーマを共有パッケージ（`@repo/api-schema`）で管理しています。
@@ -26,7 +22,43 @@ API のリクエスト/レスポンスのスキーマを `@repo/api-schema` パ�
 ```typescript
 import { z } from 'zod'
 
-// GET /api/auth/me のレスポンス
+// ========================================================
+// GET /api/auth/google/callback
+// ========================================================
+
+/**
+ * Google OAuth callbackのリクエストスキーマ
+ */
+export const authGoogleCallbackRequestSchema = z.object({
+  code: z.string().min(1, 'Authorization code is required'),
+})
+
+export type AuthGoogleCallbackRequest = z.infer<typeof authGoogleCallbackRequestSchema>
+
+/**
+ * Google OAuth callbackのレスポンススキーマ
+ */
+export const authGoogleCallbackResponseSchema = z.object({
+  is_new_user: z.boolean(),
+  token: z.string(),
+  user: z.object({
+    avatar_url: z.string().nullable(),
+    created_at: z.string(),
+    email: z.string().nullable(),
+    id: z.number(),
+    name: z.string().nullable(),
+  }),
+})
+
+export type AuthGoogleCallbackResponse = z.infer<typeof authGoogleCallbackResponseSchema>
+
+// ========================================================
+// GET /api/auth/me
+// ========================================================
+
+/**
+ * ユーザー認証のレスポンススキーマ
+ */
 export const authMeResponseSchema = z.object({
   avatar_url: z.string().nullable(),
   created_at: z.string(),
@@ -43,15 +75,37 @@ export type AuthMeResponse = z.infer<typeof authMeResponseSchema>
 - `created_at` は ISO 8601 形式の文字列（例: `2024-01-01T00:00:00.000Z`）
 - nullable なフィールドは `.nullable()` を使用
 
-### 2. エクスポート
+### 2. 共通スキーマ定義
 
 **ファイル**: `packages/schema/src/api-schema/index.ts`
 
-既存のエクスポートに追加：
+全エンドポイント共通で使用するスキーマを定義：
 
 ```typescript
+import { z } from 'zod'
+
+/**
+ * エラーレスポンススキーマ（全エンドポイント共通）
+ */
+export const errorResponseSchema = z.object({
+  error: z.string(),
+  status_code: z.number(),
+})
+
+export type ErrorResponse = z.infer<typeof errorResponseSchema>
+
 export * from './auth'
+
+// 今後、他のAPIスキーマを追加する場合はここに追記
+// export * from './post'
+// export * from './comment'
+
 ```
+
+**注意点**:
+- `errorResponseSchema` は全エンドポイント共通のエラー形式を定義
+- `index.ts` で直接定義することで、auth 以外の API でも使用可能
+- `export * from './auth'` で auth スキーマを全てエクスポート
 
 ### 3. スキーマパッケージのビルド
 
