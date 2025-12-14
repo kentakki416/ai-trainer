@@ -1,13 +1,7 @@
 # Phase 1: MVP開発 - ルートドキュメント
 
 ## ゴール
-Phase 1 では AI Trainer のコア機能を 8 週間で形にし、目標設定 → AI ロードマップ → 進捗記録 → キャラクター成長まで一連の体験が成立する MVP を完成させる。
-
-- Week 1-2: 設計 / 環境構築
-- Week 3-4: 認証 / 目標設定 / AI 分析
-- Week 5-6: 進捗入力 / カレンダービュー
-- Week 7: キャラクター成長
-- Week 8: テスト / デバッグ / デプロイ
+Phase 1 では AI Trainer のコア機能として、「ログイン→目標設定→AIロードマップ→進捗記録→キャラクター成長」まで一連の体験が成立する MVP を完成させる。
 
 ## 機能マップ
 | カテゴリ | 概要 | ドキュメント |
@@ -41,22 +35,3 @@ Phase 1 では AI Trainer のコア機能を 8 週間で形にし、目標設定
 3. Web 版のみ（モバイルは Phase 2+）
 4. 無料ユーザーは目標再設定/AI分析を月3回まで
 5. Render 無料枠のスリープ、DB 容量 0.5GB などインフラ制約
-
-## ドキュメント構成
-```
-phase1/
-├── README.md
-├── features/
-│   ├── authentication.md
-│   ├── goal-roadmap.md
-│   ├── progress-visualization.md
-│   ├── character-growth.md
-│   └── settings-and-profile.md
-├── api/
-│   └── api-specification.md
-├── database/
-│   └── database-schema.md
-└── web/
-    ├── ui-design.md
-    └── ui-ux-design.md
-```

@@ -7,6 +7,7 @@
 3. [Turborepoの設定](#turborepoの設定)
 4. [package.jsonの設定](#packagejsonの設定)
 5. [.gitignoreの設定](#gitignoreの設定)
+6. [Dockerの構築](#dockerの構築)
 
 ---
 
@@ -196,3 +197,159 @@
     * `.env*.local`: ローカル環境変数ファイル
     * `*.tfstate`: Terraformの状態ファイル
     * `.DS_Store`: macOSのシステムファイル
+
+## Dockerの構築
+
+1. docker-compose.yamlを作成
+    ```bash
+    touch docker-compose.yaml
+    ```
+2. PostgreSQLとRedisの設定を記述
+    ```yaml
+    version: '3.8'
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        container_name: project-template-postgres
+        restart: unless-stopped
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: project_template_dev
+          POSTGRES_INITDB_ARGS: '--encoding=UTF-8 --locale=C'
+          TZ: Asia/Tokyo
+        ports:
+          - '5432:5432'
+        volumes:
+          - postgres_data:/var/lib/postgresql/data
+          - ./docker/init:/docker-entrypoint-initdb.d
+        healthcheck:
+          test: ['CMD-SHELL', 'pg_isready -U postgres']
+          interval: 10s
+          timeout: 5s
+          retries: 5
+        networks:
+          - app-network
+
+      redis:
+        image: redis:7-alpine
+        container_name: project-template-redis
+        restart: unless-stopped
+        command: redis-server --appendonly yes
+        ports:
+          - '6379:6379'
+        volumes:
+          - redis_data:/data
+        healthcheck:
+          test: ['CMD', 'redis-cli', 'ping']
+          interval: 10s
+          timeout: 5s
+          retries: 5
+        networks:
+          - app-network
+
+    volumes:
+      postgres_data:
+        driver: local
+      redis_data:
+        driver: local
+
+    networks:
+      app-network:
+        driver: bridge
+    ```
+    ＜解説＞
+    * `postgres`: PostgreSQL 16データベース
+      * `POSTGRES_DB`: データベース名
+      * `volumes`: データの永続化とSQL初期化スクリプトのマウント
+      * `healthcheck`: コンテナの健全性チェック
+    * `redis`: Redisキャッシュサーバー
+      * `command`: AOF永続化モードで起動
+      * `volumes`: データの永続化
+    * `networks`: サービス間通信用のネットワーク
+
+3. .dockerignoreを作成
+    ```bash
+    touch .dockerignore
+    ```
+4. .dockerignoreに以下を追加    
+    ```.dockerignore
+    # Dependencies
+    node_modules/
+    .pnp
+    .pnp.js
+
+    # Testing
+    coverage/
+
+    # Build output
+    .next/
+    out/
+    dist/
+    build/
+
+    # Misc
+    .DS_Store
+    *.pem
+
+    # Debug
+    npm-debug.log*
+    yarn-debug.log*
+    yarn-error.log*
+    pnpm-debug.log*
+
+    # Local env files
+    .env*.local
+    secret
+
+    # Turbo
+    .turbo/
+
+    # Git
+    .git
+    .gitignore
+
+    # IDE
+    .vscode/
+    .idea/
+    *.swp
+    *.swo
+    *~
+
+    # Docker
+    Dockerfile
+    docker-compose*.yml
+    .dockerignore
+
+    # Documentation
+    README.md
+    docs/
+
+    # CI/CD
+    .github/
+    .gitlab-ci.yml
+
+    # Terraform
+    packages/terraform/
+    ```
+5. .gitignoreにDocker関連の設定を追加
+    ```gitignore
+    ...
+    
+    # Docker
+    docker-compose.override.yml
+    *.log
+    ```
+
+6. Dockerコンテナの起動
+    ```bash
+    # コンテナを起動
+    docker compose up -d
+
+    # 状態を確認
+    docker compose ps
+
+    # 停止
+    docker compose down
+    ```
