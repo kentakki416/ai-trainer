@@ -6,7 +6,7 @@ export interface UserRepository {
   findById(id: number): Promise<User | null>
 }
 
-export interface CreateUserInput {
+export type CreateUserInput = {
   avatarUrl?: string
   email?: string
   name?: string

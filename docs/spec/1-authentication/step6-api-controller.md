@@ -113,7 +113,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
 ```typescript
 import { NextFunction, Request, Response } from 'express'
 
-import { GoogleOAuthClient } from '../../client/google-oauth'
+import { GoogleOAuthClient } from '../../client/google-auth'
 
 export class AuthGoogleController {
   constructor(private googleOAuthClient: GoogleOAuthClient) {}
@@ -137,16 +137,18 @@ export class AuthGoogleController {
 ```typescript
 import { NextFunction, Request, Response } from 'express'
 
-import { AccountRepository } from '../../repository/mysql/account'
-import { UserCharacterRepository } from '../../repository/mysql/user-character'
-import { UserRepository } from '../../repository/mysql/user'
-import { GoogleOAuthClient } from '../../client/google-oauth'
-import { authenticateWithGoogle } from '../../service/auth'
+import {
+  AuthAccountRepository,
+  UserCharacterRepository,
+  UserRepository,
+} from '../../repository/mysql'
+import { GoogleOAuthClient } from '../../client/google-auth'
+import { authenticateWithGoogle } from '../../service/auth-service'
 
 export class AuthGoogleCallbackController {
   constructor(
     private userRepository: UserRepository,
-    private accountRepository: AccountRepository,
+    private authAccountRepository: AuthAccountRepository,
     private userCharacterRepository: UserCharacterRepository,
     private googleOAuthClient: GoogleOAuthClient,
     private frontendUrl: string
@@ -163,7 +165,7 @@ export class AuthGoogleCallbackController {
       const result = await authenticateWithGoogle(
         code,
         this.userRepository,
-        this.accountRepository,
+        this.authAccountRepository,
         this.userCharacterRepository,
         this.googleOAuthClient
       )
@@ -199,8 +201,8 @@ import { authMeResponseSchema } from '@repo/api-schema'
 
 import { AppError } from '../../middleware/error-handler'
 import { AuthRequest } from '../../middleware/auth'
-import { getUserById } from '../../service/auth'
-import { UserRepository } from '../../repository/mysql/user'
+import { getUserById } from '../../service/auth-service'
+import { UserRepository } from '../../repository/mysql'
 
 export class AuthMeController {
   constructor(private userRepository: UserRepository) {}

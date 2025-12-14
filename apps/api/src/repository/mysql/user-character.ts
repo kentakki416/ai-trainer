@@ -6,7 +6,7 @@ export interface UserCharacterRepository {
   findByUserId(userId: number): Promise<UserCharacter[]>
 }
 
-export interface CreateUserCharacterInput {
+export type CreateUserCharacterInput = {
   characterCode: CharacterCode
   isActive?: boolean
   nickName: string

@@ -257,6 +257,97 @@ const result = await getUser(request, this.userRepository, this.paymentClient)
 
 ---
 
+### なぜドメインモデル層を用意しないのか？
+
+このアーキテクチャでは、**ドメインモデル（Domain Model）と永続化モデル（Persistence Model）を分離していません**。Prisma の生成型（`User`, `CharacterCode` など）を Service 層で直接使用しています。
+
+#### 現在のアプローチ（ドメインモデルなし）
+
+```typescript
+// Service 層で Prisma の型を直接使用
+import { User, CharacterCode } from '../prisma/generated/client'
+
+export const authenticateWithGoogle = async (
+  ...
+): Promise<{ user: User, ... }> => {
+  const user: User = await userRepository.create(...)
+  return { user, ... }
+}
+```
+
+#### このアプローチを採用する理由
+
+**1. YAGNI 原則（You Aren't Gonna Need It）**
+- 小〜中規模のアプリケーションでは、ドメインモデルと永続化モデルの分離は**過度な抽象化**になりがち
+- 実際に分離が必要になるまでは、シンプルな構成を保つ方が保守性が高い
+- 必要になった時点でリファクタリングすれば良い
+
+**2. 開発速度の向上**
+- Prisma の型を直接使うことで、型定義の重複を避けられる
+- マッピング層（Domain ↔ Persistence の変換）を書く手間が不要
+- ファイル数が少なく、理解しやすい
+
+**3. Repository パターンで十分な抽象化**
+- Repository インターフェースを使用しているため、データアクセス層は抽象化されている
+- Prisma から別の ORM への移行が必要になった場合も、Repository 層で吸収可能
+- Service 層のビジネスロジック自体は、データソースに依存していない
+
+**4. TypeScript の型安全性**
+- Prisma の型は自動生成されるため、スキーマ変更時も型安全性が保たれる
+- マッピングコードを書くと、変換時のバグや型の不一致が発生しやすい
+
+#### ドメインモデル分離が必要になるケース
+
+将来的に以下のような要件が出た場合は、ドメインモデル層の導入を検討すべき：
+
+**1. 複雑なビジネスルールが増えた**
+```typescript
+// ドメインモデルにビジネスロジックを持たせる
+class User {
+  constructor(private id: number, private email: string) {}
+
+  canPurchase(amount: number): boolean {
+    // 複雑なビジネスルール
+  }
+
+  applyDiscount(plan: SubscriptionPlan): number {
+    // ビジネスロジック
+  }
+}
+```
+
+**2. 複数のデータソースから同じエンティティを構築**
+```typescript
+// MySQL の User + Redis のセッション情報 → 統一された User ドメインモデル
+const dbUser = await userRepository.findById(id)
+const sessionInfo = await sessionRepository.get(userId)
+const domainUser = new User(dbUser, sessionInfo)  // 統合
+```
+
+**3. データベーススキーマとビジネス概念が乖離**
+```typescript
+// DB: first_name, last_name（分離）
+// ドメイン: fullName（統合）
+class User {
+  get fullName(): string {
+    return `${this.firstName} ${this.lastName}`
+  }
+}
+```
+
+**4. 複数の永続化先をサポート**
+- 同じドメインモデルを、MySQL、MongoDB、外部 API などから復元する必要がある場合
+
+#### まとめ
+
+- **現在**: Prisma の型を直接使用（シンプル、高速開発）
+- **将来**: ビジネスロジックが複雑化したらドメインモデル層を導入
+- **判断基準**: Service 層にビジネスロジックが増え、テストや保守が困難になったタイミング
+
+このアプローチは「**実用的な抽象化**」のバランスを取っており、個人開発〜中規模チーム開発に適しています。
+
+---
+
 #### 4. Repository (`repository/`)
 - データベースアクセスの抽象化
 - CRUD 操作の実装
