@@ -3,15 +3,11 @@
 ## 目的
 ルーティングを定義し、Dependency Injection（DI）を実行してアプリケーションを起動する。このステップで、すべての層（Repository、Service、Controller）を統合し、実際に動作する API サーバーを構築します。
 
-## 実装箇所
-- `apps/api/src/route/auth-route.ts`
-- `apps/api/src/index.ts`
-
 ## 実装手順
 
-### Auth Route 作成
+### Auth Router 作成
 
-**ファイル**: `apps/api/src/route/auth-route.ts`
+**ファイル**: `apps/api/src/routes/auth-router.ts`
 
 ```typescript
 import { Router } from 'express'
@@ -21,6 +17,9 @@ import { AuthGoogleCallbackController } from '../controller/auth/google-callback
 import { AuthMeController } from '../controller/auth/me'
 import { authMiddleware } from '../middleware/auth'
 
+/**
+ * 認証関連のルーター
+ */
 export const authRouter = (
   authGoogleController: AuthGoogleController,
   authGoogleCallbackController: AuthGoogleCallbackController,
@@ -29,18 +28,16 @@ export const authRouter = (
   const router = Router()
 
   // GET /api/auth/google
-  router.get('/google', (req, res, next) =>
-    authGoogleController.execute(req, res, next)
-  )
+  router.get('/google', (req, res) => authGoogleController.execute(req, res))
 
   // GET /api/auth/google/callback
-  router.get('/google/callback', (req, res, next) =>
-    authGoogleCallbackController.execute(req, res, next)
+  router.get('/google/callback', async (req, res) =>
+    authGoogleCallbackController.execute(req, res)
   )
 
   // GET /api/auth/me
-  router.get('/me', authMiddleware, (req, res, next) =>
-    authMeController.execute(req, res, next)
+  router.get('/me', authMiddleware, async (req, res) =>
+    authMeController.execute(req, res)
   )
 
   return router
@@ -52,6 +49,7 @@ export const authRouter = (
 - Controller を引数で受け取る（Dependency Injection）
 - `/me` エンドポイントには `authMiddleware` を適用（認証必須）
 - 各エンドポイントで Controller の `execute` メソッドを呼び出し
+- Router インスタンスは各ドメインで必要最低限のみ生成
 
 ### index.ts で DI + サーバー起動
 
@@ -61,17 +59,15 @@ export const authRouter = (
 import cors from 'cors'
 import dotenv from 'dotenv'
 import express from 'express'
-import { PrismaClient } from '@prisma/client'
 
 import { GoogleAuthLibraryClient } from './client/google-oauth'
 import { AuthGoogleCallbackController } from './controller/auth/google-callback'
 import { AuthGoogleController } from './controller/auth/google'
 import { AuthMeController } from './controller/auth/me'
 import { errorHandler } from './middleware/error-handler'
-import { PrismaAccountRepository } from './repository/mysql/account'
-import { PrismaUserCharacterRepository } from './repository/mysql/user-character'
-import { PrismaUserRepository } from './repository/mysql/user'
-import { authRouter } from './route/auth-route'
+import { PrismaClient } from './prisma/generated/client'
+import { PrismaAuthAccountRepository, PrismaUserCharacterRepository, PrismaUserRepository } from './repository/mysql'
+import { authRouter } from './routes/auth-router'
 
 dotenv.config({ path: '.env.local' })
 
@@ -95,7 +91,7 @@ const prisma = new PrismaClient()
 
 // Repository のインスタンス化
 const userRepository = new PrismaUserRepository(prisma)
-const accountRepository = new PrismaAccountRepository(prisma)
+const accountRepository = new PrismaAuthAccountRepository(prisma)
 const userCharacterRepository = new PrismaUserCharacterRepository(prisma)
 
 // Client のインスタンス化
@@ -296,59 +292,3 @@ app.use(
 - Google OAuth のコールバック URL を HTTPS に設定
 - Cookie の Secure 属性を有効化
 - HSTS（HTTP Strict Transport Security）ヘッダーを設定
-
-## ディレクトリ構造（完成形）
-
-```
-apps/api/src/
-├── client/
-│   └── google-oauth.ts              # Google OAuth Client
-├── controller/
-│   └── auth/
-│       ├── google.ts                # Google OAuth Controller
-│       ├── google-callback.ts       # Google OAuth Callback Controller
-│       └── me.ts                    # Get Current User Controller
-├── lib/
-│   └── jwt.ts                       # JWT ユーティリティ
-├── middleware/
-│   ├── auth.ts                      # 認証ミドルウェア
-│   └── error-handler.ts             # エラーハンドラー
-├── repository/
-│   └── mysql/
-│       ├── account.ts               # Account Repository
-│       ├── user.ts                  # User Repository
-│       └── user-character.ts        # UserCharacter Repository
-├── route/
-│   └── auth-route.ts                # Auth Route
-├── service/
-│   └── auth.ts                      # Auth Service
-└── index.ts                         # エントリーポイント（DI + サーバー起動）
-```
-
-## トラブルシューティング
-
-### 問題: `GOOGLE_CLIENT_ID environment variable is required` エラー
-
-**原因**: `.env.local` ファイルが存在しないか、環境変数が設定されていない
-
-**解決策**:
-1. `apps/api/.env.local` ファイルを作成
-2. 必要な環境変数を設定（[step2-api-client.md](./step2-api-client.md) を参照）
-
-### 問題: `PrismaClient` のエラー
-
-**原因**: Prisma のマイグレーションが実行されていない
-
-**解決策**:
-```bash
-cd apps/api
-pnpm prisma migrate dev
-```
-
-### 問題: CORS エラー
-
-**原因**: フロントエンドの URL が CORS の `origin` に含まれていない
-
-**解決策**:
-1. `.env.local` の `FRONTEND_URL` を確認
-2. フロントエンドが実際に動作している URL と一致していることを確認
