@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 
 import { ErrorResponse } from '@repo/api-schema'
 
-import { GoogleOAuthClient } from '../../client/google-auth'
+import { GoogleOAuthClient } from '../../client/google-oauth'
 
 /**
  * Google OAuth 認証を開始（Googleの認証画面にリダイレクト）API

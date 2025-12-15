@@ -1,10 +1,6 @@
 import jwt, { type Secret, type SignOptions } from 'jsonwebtoken'
 
-if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET environment variable is required')
-}
-
-const JWT_SECRET: Secret = process.env.JWT_SECRET
+const JWT_SECRET: Secret = process.env.JWT_SECRET as string
 const JWT_EXPIRATION: string = process.env.JWT_EXPIRATION || '30d'
 
 export type JWTPayload = {

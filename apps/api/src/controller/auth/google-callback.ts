@@ -6,7 +6,7 @@ import {
   ErrorResponse,
 } from '@repo/api-schema'
 
-import { GoogleOAuthClient } from '../../client/google-auth'
+import { GoogleOAuthClient } from '../../client/google-oauth'
 import { AuthAccountRepository, UserRegistrationRepository } from '../../repository/mysql'
 import { authenticateWithGoogle } from '../../service/auth-service'
 

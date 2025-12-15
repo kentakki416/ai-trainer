@@ -1,4 +1,4 @@
-import { GoogleOAuthClient, GoogleUserInfo } from '../client/google-auth'
+import { GoogleOAuthClient, GoogleUserInfo } from '../client/google-oauth'
 import { generateToken } from '../lib/jwt'
 import { CharacterCode, User } from '../prisma/generated/client'
 import {

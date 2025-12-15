@@ -2,10 +2,11 @@ const { defineConfig } = require('eslint/config')
 const typescriptEslint = require('@typescript-eslint/eslint-plugin')
 const typescriptParser = require('@typescript-eslint/parser')
 const importPlugin = require('eslint-plugin-import')
+const jestPlugin = require('eslint-plugin-jest')
 
 module.exports = defineConfig([
   {
-    files: ['**/*.ts'],
+    files: ['src/**/*.ts', 'test/**/*.ts'],
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
@@ -29,13 +30,13 @@ module.exports = defineConfig([
     rules: {
       // === Console ===
       'no-console': ['warn', { allow: ['warn', 'error'] }], // console.log は警告、warn/error は許可
-      
+
       // === 未使用変数 ===
       '@typescript-eslint/no-unused-vars': ['error', {
         argsIgnorePattern: '^_',  // _で始まる引数は除外
         varsIgnorePattern: '^_',  // _で始まる変数は除外
       }],
-      
+
       // === コードスタイル ===
       'object-curly-spacing': ['error', 'always'],  // { foo } のようにスペースを入れる
       'quotes': ['error', 'single'],                 // シングルクォートを強制
@@ -43,7 +44,7 @@ module.exports = defineConfig([
       'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0, maxBOF: 0 }], // 連続する空行は最大1行、ファイルの先頭/末尾は0行
       'padded-blocks': ['error', 'never'], // ブロックの開始/終了での空行を禁止
       'no-trailing-spaces': 'error', // 行末のスペースを禁止
-      
+
       // === Import順序 ===
       'import/order': [
         'error',
@@ -71,20 +72,20 @@ module.exports = defineConfig([
           pathGroupsExcludedImportTypes: ['builtin'],
         },
       ],
-      
+
       // === オブジェクトキーの順序 ===
       'sort-keys': ['error', 'asc', {
         caseSensitive: true,   // 大文字小文字を区別
         minKeys: 2,            // 2つ以上のキーがある場合のみ適用
         natural: false,        // 自然順ソートを無効化
       }],
-      
+
       // === TypeScript: 型安全性 ===
       '@typescript-eslint/no-empty-function': 'error',                 // 空の関数を禁止
       '@typescript-eslint/no-explicit-any': 'warn',                    // any型は警告
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',     // 不要な型アサーションを禁止
       '@typescript-eslint/promise-function-async': 'warn',             // Promiseを返す関数はasyncに
-      
+
       // === TypeScript: 命名規則 ===
       '@typescript-eslint/naming-convention': [
         'error',
@@ -101,7 +102,7 @@ module.exports = defineConfig([
           selector: 'typeLike',
         },
       ],
-      
+
       // === コード品質: 比較と構文 ===
       'eqeqeq': ['error', 'always'],           // === と !== を強制（== と != を禁止）
       'no-return-await': 'error',              // 不要な return await を禁止
@@ -115,5 +116,16 @@ module.exports = defineConfig([
   {
     ignores: ['dist/**', 'node_modules/**', 'src/prisma/generated/**'],
   },
+  {
+    files: ['test/**/*.ts'],
+    plugins: {
+      jest: jestPlugin,
+    },
+    rules: {
+      'jest/expect-expect': 'error',
+      'jest/no-disabled-tests': 'warn',
+      'jest/no-focused-tests': 'error',
+      'jest/valid-expect': 'error',
+    },
+  },
 ])
-
