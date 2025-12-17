@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 
 import { ErrorResponse } from '@repo/api-schema'
 
+import { PUBLIC_PATHS } from '../const'
 import { verifyToken } from '../lib/jwt'
 
 export interface AuthRequest extends Request {
@@ -9,6 +10,11 @@ export interface AuthRequest extends Request {
 }
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
+  // 公開パスは認証不要
+  if (PUBLIC_PATHS.some(path => req.path.startsWith(path))) {
+    return next()
+  }
+
   try {
     const authHeader = req.headers.authorization
 
@@ -32,7 +38,7 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
     }
 
     req.userId = payload.userId
-    next()
+    return next()
   } catch {
     const errorResponse: ErrorResponse = {
       error: 'Authentication failed',

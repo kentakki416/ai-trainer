@@ -3,7 +3,6 @@ import { Router } from 'express'
 import { AuthGoogleController } from '../controller/auth/google'
 import { AuthGoogleCallbackController } from '../controller/auth/google-callback'
 import { AuthMeController } from '../controller/auth/me'
-import { authMiddleware } from '../middleware/auth'
 
 /**
  * 認証関連のルーター
@@ -23,8 +22,8 @@ export const authRouter = (
     authGoogleCallbackController.execute(req, res)
   )
 
-  // GET /api/auth/me
-  router.get('/me', authMiddleware, async (req, res) =>
+  // GET /api/auth/me (グローバルにauthMiddlewareが適用済み)
+  router.get('/me', async (req, res) =>
     authMeController.execute(req, res)
   )
 
