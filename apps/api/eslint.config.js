@@ -73,13 +73,6 @@ module.exports = defineConfig([
         },
       ],
 
-      // === オブジェクトキーの順序 ===
-      'sort-keys': ['error', 'asc', {
-        caseSensitive: true,   // 大文字小文字を区別
-        minKeys: 2,            // 2つ以上のキーがある場合のみ適用
-        natural: false,        // 自然順ソートを無効化
-      }],
-
       // === TypeScript: 型安全性 ===
       '@typescript-eslint/no-empty-function': 'error',                 // 空の関数を禁止
       '@typescript-eslint/no-explicit-any': 'warn',                    // any型は警告

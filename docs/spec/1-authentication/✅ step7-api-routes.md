@@ -1,4 +1,4 @@
-# Step 5: API - Route 層と Dependency Injection
+# Step 7: API - Route 層と Dependency Injection
 
 ## 目的
 ルーティングを定義し、Dependency Injection（DI）を実行してアプリケーションを起動する。このステップで、すべての層（Repository、Service、Controller）を統合し、実際に動作する API サーバーを構築します。

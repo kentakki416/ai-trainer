@@ -1,4 +1,4 @@
-## Step 6: Web - Server Actions
+## Step 9: Web - Server Actions
 
 ### 目的
 Server Actionsを使った認証フローを実装し、cookiesベースのセッション管理を行う。

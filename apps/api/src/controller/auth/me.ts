@@ -2,6 +2,7 @@ import { Response } from 'express'
 
 import { authMeResponseSchema, ErrorResponse } from '@repo/api-schema'
 
+import { logger } from '../../log'
 import { AuthRequest } from '../../middleware/auth'
 import { UserRepository } from '../../repository/mysql'
 import { getUserById } from '../../service/auth-service'
@@ -14,15 +15,26 @@ export class AuthMeController {
 
   async execute(req: AuthRequest, res: Response) {
     try {
+      logger.info('AuthMeController: Fetching user information', {
+        requestedUserId: req.userId,
+      })
+
       const user = await getUserById(req.userId!, this.userRepository)
 
       if (!user) {
+        logger.warn('AuthMeController: User not found', {
+          requestedUserId: req.userId,
+        })
         const errorResponse: ErrorResponse = {
           error: 'User not found',
           status_code: 404,
         }
         return res.status(404).json(errorResponse)
       }
+
+      logger.info('AuthMeController: User information retrieved successfully', {
+        userId: user.id,
+      })
 
       // レスポンススキーマのバリデーション
       const response = authMeResponseSchema.parse({
@@ -35,6 +47,10 @@ export class AuthMeController {
 
       res.status(200).json(response)
     } catch (error) {
+      logger.error(
+        'AuthMeController: Failed to get user information',
+        error instanceof Error ? error : new Error('Unknown error')
+      )
       const errorResponse: ErrorResponse = {
         error: error instanceof Error ? error.message : 'Failed to get user information',
         status_code: 500,

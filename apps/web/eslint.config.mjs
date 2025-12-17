@@ -69,17 +69,6 @@ const eslintConfig = defineConfig([
         },
       ],
 
-      // === オブジェクトキーの順序 ===
-      "sort-keys": [
-        "error",
-        "asc",
-        {
-          caseSensitive: true, // 大文字小文字を区別
-          natural: false, // 自然順ソートを無効化
-          minKeys: 2, // 2つ以上のキーがある場合のみ適用
-        },
-      ],
-
       // === React: JSX Props順序 ===
       "react/jsx-sort-props": [
         "error",
