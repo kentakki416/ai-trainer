@@ -28,6 +28,120 @@
 - **ログイン画面**: 「Google でログイン」ボタンを配置し、`/api/auth/google` にリダイレクト
 - **コールバック処理画面**: Google からのリダイレクトを受け取り、JWT をローカルストレージまたは Cookie に保存
 
+## フロントエンド（Web）の認証設計
+
+### 使用技術
+
+- **フレームワーク**: Next.js 16 (App Router)
+- **認証方式**: cookiesベースのセッション管理
+- **状態管理**: Server Actions（`'use server'` ディレクティブ）
+- **アニメーション**: lottie-react（トレちゃんのアニメーション表示）
+
+### 認証フロー
+
+1. **ログイン画面** (`app/(auth)/login/page.tsx`)
+   - 「Googleでログイン」ボタンをクリック
+   - APIサーバーの `/api/auth/google` にリダイレクト
+
+2. **Google OAuth認証**
+   - ユーザーがGoogleアカウントで認証
+   - Google から APIサーバーの `/api/auth/google/callback` にリダイレクト
+
+3. **コールバック処理** (`app/auth/callback/page.tsx`)
+   - クエリパラメータから `token` を取得
+   - Server Action `handleAuthCallback(token)` を呼び出し
+   - JWTをhttpOnly cookieに保存（`ai_trainer_token`）
+   - ホーム画面（`/`）にリダイレクト
+
+4. **認証済みページ** (`app/page.tsx`)
+   - Server Action `getCurrentUser()` でユーザー情報を取得
+   - cookieからJWTを読み取り、APIサーバーに `/api/auth/me` リクエスト
+   - ユーザー情報を表示
+
+5. **ログアウト**
+   - Server Action `logout()` を呼び出し
+   - cookieからJWTを削除
+   - ログイン画面（`/login`）にリダイレクト
+
+### セッション管理
+
+#### Cookie設定
+
+```typescript
+{
+  httpOnly: true,        // XSS攻撃対策（JavaScriptからアクセス不可）
+  secure: true,          // 本番環境ではHTTPS必須
+  sameSite: 'lax',       // CSRF攻撃対策
+  maxAge: 60 * 60 * 24 * 30, // 30日間有効
+  path: '/',
+}
+```
+
+#### 認証ユーティリティ (`lib/auth.ts`)
+
+- `saveToken(token: string)`: JWTをcookieに保存
+- `getToken()`: cookieからJWTを取得
+- `removeToken()`: cookieからJWTを削除
+
+**注意**: `'server-only'` をインポートして、サーバーサイドでのみ実行されることを保証
+
+### Server Actions (`lib/actions/auth.ts`)
+
+| 関数 | 説明 | 返り値 |
+|------|------|--------|
+| `handleAuthCallback(token: string)` | OAuthコールバック後の処理。JWTをcookieに保存し、ホーム画面にリダイレクト | void |
+| `logout()` | ログアウト処理。cookieからJWTを削除し、ログイン画面にリダイレクト | void |
+| `getCurrentUser()` | 現在ログイン中のユーザー情報を取得。cookieからJWTを取得し、APIサーバーに問い合わせ | User \| null |
+
+**注意**: すべての関数に `'use server'` ディレクティブを付与
+
+### 認証チェック (middleware.ts)
+
+Next.js のミドルウェアで認証チェックを行い、未認証時にリダイレクト：
+
+- **保護されたパス** (`/`): cookieに `ai_trainer_token` がない場合、`/login` にリダイレクト
+- **ログインページ** (`/login`): cookieに `ai_trainer_token` がある場合、`/` にリダイレクト
+
+### ディレクトリ構成
+
+```
+apps/web/
+├── app/
+│   ├── (auth)/
+│   │   └── login/
+│   │       └── page.tsx            # ログイン画面
+│   ├── auth/
+│   │   └── callback/
+│   │       └── page.tsx            # OAuthコールバック処理
+│   └── page.tsx                    # ホーム画面（認証済み）
+├── lib/
+│   ├── auth.ts                     # 認証ユーティリティ（saveToken, getToken, removeToken）
+│   └── actions/
+│       └── auth.ts                 # Server Actions（handleAuthCallback, logout, getCurrentUser）
+├── middleware.ts                   # 認証チェック
+└── .env.local                      # 環境変数（NEXT_PUBLIC_API_URL）
+```
+
+### 使用ライブラリ
+
+| ライブラリ | 用途 | インストールコマンド |
+|-----------|------|---------------------|
+| lottie-react | トレちゃんのアニメーション表示 | `pnpm add lottie-react` |
+
+### セキュリティ考慮事項
+
+- **httpOnly cookie**: JavaScriptからアクセスできないため、XSS攻撃に強い
+- **Secure flag**: 本番環境では必ずHTTPSを使用（`NODE_ENV === 'production'` で自動設定）
+- **SameSite=Lax**: CSRF攻撃を防ぐ
+- **Server Actions**: サーバーサイドで実行されるため、クライアントサイドにトークンが露出しない
+- **Middleware**: すべてのリクエストで認証チェックを行い、未認証時はリダイレクト
+
+### レスポンシブデザイン
+
+- **PC表示（768px以上）**: 左にログインフォーム、右にLottieアニメーション（横並び）
+- **モバイル表示（768px未満）**: 上部にアニメーション、下部にログインフォーム（縦並び）
+- **メインカラー**: 青（`blue-500`, `blue-600`, `from-blue-50 to-blue-100`）
+
 ## 必要な DB 設計
 
 | テーブル | 説明 | リレーション |

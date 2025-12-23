@@ -27,6 +27,9 @@ export class PinoLogger implements ILogger {
           env: env,
         },
         level: logLevel,
+        mixin: () => {
+          return logContext.getStore() || {}
+        },
         timestamp: pino.stdTimeFunctions.isoTime,
       },
       env === NODE_ENV.PRD
@@ -42,32 +45,21 @@ export class PinoLogger implements ILogger {
     )
   }
 
-  /**
-   * コンテキスト（requestId, userId）を含むchild loggerを取得
-   */
-  private getLogger(): pino.Logger {
-    const context = logContext.getStore()
-    if (context) {
-      return this.logger.child(context)
-    }
-    return this.logger
-  }
-
   debug(message: string, metadata?: LogMetadata): void {
-    this.getLogger().debug(metadata || {}, message)
+    this.logger.debug(metadata || {}, message)
   }
 
   info(message: string, metadata?: LogMetadata): void {
-    this.getLogger().info(metadata || {}, message)
+    this.logger.info(metadata || {}, message)
   }
 
   warn(message: string, metadata?: LogMetadata): void {
-    this.getLogger().warn(metadata || {}, message)
+    this.logger.warn(metadata || {}, message)
   }
 
   error(message: string, error?: Error, metadata?: LogMetadata): void {
     if (error) {
-      this.getLogger().error(
+      this.logger.error(
         {
           err: {
             message: error.message,
@@ -78,7 +70,7 @@ export class PinoLogger implements ILogger {
         message
       )
     } else {
-      this.getLogger().error(metadata || {}, message)
+      this.logger.error(metadata || {}, message)
     }
   }
 }
