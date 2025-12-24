@@ -1,12 +1,5 @@
-import path from 'path'
-
-import dotenv from 'dotenv'
-
 import { CharacterCode } from './generated/client'
 import { prisma } from './prisma.client'
-
-// .env.local ファイルを読み込む
-dotenv.config({ path: path.resolve(__dirname, '../../.env.local') })
 
 async function main() {
   // トレちゃんのマスターデータを作成

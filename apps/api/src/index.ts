@@ -1,5 +1,4 @@
 import cors from 'cors'
-import dotenv from 'dotenv'
 import express from 'express'
 
 import { GoogleOAuthClient } from './client/google-oauth'
@@ -17,8 +16,6 @@ import {
   PrismaUserRegistrationRepository
 } from './repository/mysql'
 import { authRouter } from './routes/auth-router'
-
-dotenv.config({ path: '.env.local' })
 
 const app = express()
 const PORT = process.env.PORT || 8080

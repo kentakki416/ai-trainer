@@ -1,7 +1,30 @@
 # Dependencies
-node_modules/
-.pnp
-.pnp.js
+node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
 
 # Testing
 coverage/
@@ -24,9 +47,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Local env files
-.env
-.env*.local
+# dotenvx
+.env.keys
 secret
 
 # Turbo
@@ -34,6 +56,10 @@ secret
 
 # Vercel
 .vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
 
 # Terraform
 *.tfstate
@@ -56,3 +82,10 @@ Thumbs.db
 # Docker
 docker-compose.override.yml
 *.log
+
+
+# generated native folders
+/ios
+/android
+app-example
+
