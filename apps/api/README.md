@@ -119,15 +119,3 @@ npx prisma db seed
 # Studio の起動
 npx prisma studio --url postgresql://postgres:password@localhost:5432/ai_trainer_dev
 ```
-
-## 環境変数
-
-`.env.local` に以下を設定:
-
-- `PORT`: サーバーポート（デフォルト: 8080）
-- `FRONTEND_URL`: CORS 許可オリジン
-- `GOOGLE_CLIENT_ID`: Google OAuth クライアントID
-- `GOOGLE_CLIENT_SECRET`: Google OAuth クライアントシークレット
-- `GOOGLE_CALLBACK_URL`: Google OAuth コールバックURL
-- `JWT_SECRET`: JWT署名用シークレット
-- `DATABASE_URL`: PostgreSQL接続文字列
