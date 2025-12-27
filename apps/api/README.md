@@ -12,77 +12,49 @@ Express.js + TypeScript による API サーバー
 apps/api/
 ├── src/
 │   ├── index.ts                         # エントリーポイント（DI、サーバー起動）
-│   ├── routes/                          # ルーティング定義
+│   ├── client/                          # 外部APIクライアント（OAuth等）
+│   ├── const/                           # 定数定義
 │   ├── controller/                      # リクエスト/レスポンスハンドリング
 │   │   └── auth/                        # 認証関連のコントローラー
-│   ├── service/                         # ビジネスロジック（関数型）
+│   ├── lib/                             # ユーティリティ（JWT等）
+│   ├── log/                             # ロギング設定
+│   ├── middleware/                      # 共通ミドルウェア
+│   ├── prisma/                          # Prisma設定、マイグレーション
 │   ├── repository/mysql/                # データアクセス層（Prisma）
 │   │   └── aggregate/                   # 複数テーブルを跨ぐ操作
-│   ├── client/                          # 外部APIクライアント（OAuth等）
-│   ├── middleware/                      # 共通ミドルウェア
-│   ├── log/                             # ロギング設定
-│   ├── lib/                             # ユーティリティ（JWT等）
-│   ├── const/                           # 定数定義
-│   └── prisma/                          # Prisma設定、マイグレーション
+│   ├── routes/                          # ルーティング定義
+│   ├── service/                         # ビジネスロジック（関数型）
+│   └── types/                           # 型定義
+│       └── domain/                      # ドメインモデルの型定義
 ├── .env.local                           # 環境変数
 ├── package.json
 └── tsconfig.json
 ```
 
-## アーキテクチャ
-
-### 各層の責務
-
-| 層 | 責務 | 実装スタイル |
-|---|---|---|
-| **Route** | エンドポイントとコントローラーのマッピング | Express Router |
-| **Controller** | リクエスト受付・バリデーション（Zod）・レスポンス返却 | クラス型 + `execute` メソッド |
-| **Service** | ビジネスロジック、トランザクション管理 | 関数型（Named Export） |
-| **Repository** | データアクセスの抽象化（CRUD） | クラス型 + Interface |
-| **Client** | 外部API接続の抽象化 | クラス型 |
-| **Middleware** | 認証、ロギング、エラーハンドリング | Express Middleware |
-
-### データフロー
-
-```
-Request → Route → Controller → Service → Repository/Client → Database/External API
-                     ↓
-                 Response
-```
-
 ## 設計思想
 
-### 依存性注入（DI）
+### 依存方向
 
-- **index.ts で一元管理**: Repository、Client、Controller のインスタンスを index.ts でまとめて生成し、Router に注入
-- **シングルトン管理**: 同じインスタンスを複数の Route で共有
-- **テスタビリティ**: モックの注入が容易
+- レイヤードアーキテクチャを意識して、メインのアプリケーションロジックであるservice層がDBや外部ライブラリ等の詳細を知らなくて良いようにinterfaceを使用する。
 
-### ドメインモデル層なし
+### Interfaceの利用
 
-- Prisma の生成型（`User`、`AuthAccount` 等）を Service 層で直接使用
-- YAGNI 原則に基づき、必要になるまで抽象化しない
-- Repository パターンで十分なデータアクセスの抽象化を実現
+- 引数やレスポンスにはアプリケーションの型を利用する（外部パッケージの型を変換して扱う）
 
-### 関数型 Service 層
+### 関数型のService 層
 
-- ビジネスロジックは Named Export の関数として実装
+- Service層はクラスベースではなく関数ベースにした理由
+    1. クラスのDI・インスタンス化がめんどくさい
+    2. controllerのテストはインテグレーションテストを想定しているためserviceのモックなどはしない
+    3. クラスベースでの状態管理（プライベート引数等）を使用するケースが少ない
 - Controller から必要な Repository/Client を引数として受け取る
-- クラス化による過度な抽象化を避ける
 
-## Interface 使用方針
+### ドメインモデル
 
-| 層 | Interface | 理由 |
-|---|---|---|
-| **Controller** | ❌ 不要 | Express に依存、抽象化のメリット薄い |
-| **Service** | ❌ 不要 | 関数のモックで十分 |
-| **Repository** | ✅ 使用 | データベース実装の切り替え可能性（Prisma ↔ TypeORM 等） |
-| **Client** | 🔶 ケースバイケース | 複数実装がある場合は使用（決済基盤等）、単一実装は不要（Google OAuth 等） |
+- types/domainにドメインモデルの型だけ定義している。
+- 実装はドメインロジックが必要になるまでしない（おそらく必要になるケースが少ないので対応しない）
+- Repository層でPrisma -> ドメインモデル型に変化することでInterfaceを差し替え可能なものにしている
 
-### Interface と実装の配置
-
-- **同じファイルに記述**: 実装が1つの場合は Interface と実装を同じファイルに配置（シンプル構成）
-- **分離**: 複数実装が存在する場合のみファイルを分割
 
 ## 開発コマンド
 

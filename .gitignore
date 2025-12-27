@@ -48,7 +48,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 # dotenvx
-.env.keys
+/.env.keys
 secret
 
 # Turbo

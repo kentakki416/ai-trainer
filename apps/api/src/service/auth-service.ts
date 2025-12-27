@@ -1,12 +1,13 @@
 import { GoogleOAuthClient, GoogleUserInfo } from '../client/google-oauth'
 import { generateToken } from '../lib/jwt'
 import { logger } from '../log'
-import { CharacterCode, User } from '../prisma/generated/client'
 import {
     AuthAccountRepository,
     UserRegistrationRepository,
     UserRepository,
 } from '../repository/mysql'
+import { User } from '../types/domain'
+import { CharacterCode } from '../types/domain'
 
 export type AuthenticateWithGoogleResult = {
     isNewUser: boolean
@@ -63,7 +64,7 @@ export const authenticateWithGoogle = async (
                 name: googleUser.name,
             },
             userCharacter: {
-                characterCode: CharacterCode.TRAECHAN,
+                characterCode: 'TRAECHAN' as CharacterCode,
                 isActive: true,
                 nickName: 'トレちゃん',
             },
@@ -82,7 +83,7 @@ export const authenticateWithGoogle = async (
     return {
         isNewUser,
         jwtToken,
-        user
+        user,
     }
 }
 
